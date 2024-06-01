@@ -145,7 +145,7 @@ try {
 
 
 app.post('/add-questions',async(req,res)=>{
-
+    
     try {
         function decodeJWT(token) {
             try {
@@ -170,20 +170,42 @@ app.post('/add-questions',async(req,res)=>{
             if (decoded.usertype === 'student') {
                 return res.status(400).json({ error: 'Invalid token' });
             }
+            
+            const {examname, examtime, examstate, subname} = req.body.exam;
 
-            const {qtext, qanswer, qtype } = req.body.question;
+            const questions = req.body.questions;
+
             const options = req.body.options;
 
 
-            const add_question = await Question.create({qtext, qanswer,
-                 qtype,subid:decoded.subid});
+        if (!examname || !examtime || !examstate || !subname){
+            return res.status(400).json({message : "All fields are required"});
+        }
+    
+       
+            const subid = await Subject.findOne({where : {subname}});
+
+            const exam = await Exam.create({examname, examtime, examstate, subid: subid.subid});
             
-            for (const option in options) {
-                if (options.hasOwnProperty(option)) {
-                  await Option.create({
-                    optext: options[option],
-                    qid: add_question.qid
+            for (const key in questions) {
+                if (questions.hasOwnProperty(key)) {
+                  const questionData = questions[key];
+                  const newQuestion = await Question.create({
+                    qtext: questionData.qtext,
+                    qanswer: questionData.qanswer,
+                    qtype: questionData.qtype,
+                    examid: exam.examid
                   });
+
+                  const questionOptions = options[`options_${key}`];
+                  for (const optionKey in questionOptions) {
+                    if (questionOptions.hasOwnProperty(optionKey)) {
+                      await Option.create({
+                        optext: questionOptions[optionKey],
+                        qid: newQuestion.qid
+                      });
+                    }
+                  }
                 }
               }
 
@@ -198,25 +220,6 @@ app.post('/add-questions',async(req,res)=>{
         console.log(error)
     }
 });
-
-
-
-app.post('/exams', async(req,res)=>{
-const {examname, examtime, examstate, subname} = req.body
-const subid = await Subject.findOne({where : subname})
-    if (!examname || !examtime || !examstate || !subname){
-        return res.status(400).json({message : "All fields are required"});
-    }
-
-    try {
-        const exam = await Exam.create({examname, examtime, examstate, subid: subid.subid});
-        return res.status(200).json({message : "Exam Added Succesfuly"});
-
-    } catch (error) {
-        console.log(error)
-    }
-});
-
 
 
 const PORT = 3000;

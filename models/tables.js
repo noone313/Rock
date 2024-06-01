@@ -95,57 +95,6 @@ User.belongsTo(Department, {foreignKey:'deptid'});
 
 
 
-
-const Question = sequelize.define('Question',{
-qid:{
-  type:DataTypes.INTEGER,
-  autoIncrement:true,
-  primaryKey:true
-},
-qtext:{
-  type:DataTypes.STRING,
-  allowNull:false
-},
-qanswer:{
-  type:DataTypes.STRING,
-  allowNull:false
-},
-qtype:{
-  type:DataTypes.STRING,
-  allowNull:false
-},
-subid:{
-  type:DataTypes.INTEGER
-}
-
-});
-
-Subject.hasMany(Question, {foreignKey:'subid'})
-Question.belongsTo(Subject,{foreignKey:'subid'})
-
-
-
-const Option = sequelize.define('Option',{
-opid:{
-  type:DataTypes.INTEGER,
-  autoIncrement:true,
-  primaryKey:true
-},
-optext:{
-  type:DataTypes.STRING,
-  allowNull:false
-},
-qid:{
-  type:DataTypes.INTEGER
-}
-
-});
-
-Question.hasMany(Option, {foreignKey:'qid'});
-Option.belongsTo(Question, {foreignKey:'qid'});
-
-
-
 const Exam = sequelize.define('Exam', {
 
   examid:{
@@ -175,6 +124,56 @@ const Exam = sequelize.define('Exam', {
 
 Subject.hasMany(Exam, { foreignKey:'subid'});
 Exam.belongsTo(Subject, {foreignKey:'subid'})
+
+
+
+const Question = sequelize.define('Question',{
+qid:{
+  type:DataTypes.INTEGER,
+  autoIncrement:true,
+  primaryKey:true
+},
+qtext:{
+  type:DataTypes.STRING,
+  allowNull:false
+},
+qanswer:{
+  type:DataTypes.STRING,
+  allowNull:false
+},
+qtype:{
+  type:DataTypes.STRING,
+  allowNull:false
+},
+examid:{
+  type:DataTypes.INTEGER
+}
+
+});
+
+Exam.hasMany(Question, {foreignKey:'examid'})
+Question.belongsTo(Exam,{foreignKey:'examid'})
+
+
+
+const Option = sequelize.define('Option',{
+opid:{
+  type:DataTypes.INTEGER,
+  autoIncrement:true,
+  primaryKey:true
+},
+optext:{
+  type:DataTypes.STRING,
+  allowNull:false
+},
+qid:{
+  type:DataTypes.INTEGER
+}
+
+});
+
+Question.hasMany(Option, {foreignKey:'qid'});
+Option.belongsTo(Question, {foreignKey:'qid'});
 
 
 
