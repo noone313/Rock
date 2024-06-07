@@ -1,4 +1,5 @@
-const {Sequelize, DataTypes, Op} = require('sequelize');
+const {Sequelize, DataTypes} = require('sequelize');
+
 const sequelize = new Sequelize('rock', 'postgres', 'baqerali123', {
     dialect: 'postgres',
     host: 'localhost',
@@ -77,6 +78,11 @@ const User = sequelize.define("User", {
       type:DataTypes.STRING,
       allowNull:false
   },
+  userstats:{
+      type:DataTypes.STRING,
+      allowNull:false,
+      defaultValue:'not active'
+  },
   subid:{
     type:DataTypes.INTEGER,
     allowNull:true
@@ -137,10 +143,6 @@ qtext:{
   type:DataTypes.STRING,
   allowNull:false
 },
-qanswer:{
-  type:DataTypes.STRING,
-  allowNull:false
-},
 qtype:{
   type:DataTypes.STRING,
   allowNull:false
@@ -165,6 +167,10 @@ opid:{
 optext:{
   type:DataTypes.STRING,
   allowNull:false
+},
+iscorrect:{
+  type: DataTypes.BOOLEAN,
+    allowNull: true
 },
 qid:{
   type:DataTypes.INTEGER
