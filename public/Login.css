@@ -143,7 +143,7 @@ button[type="submit"]:hover {
 
 @media (max-width: 768px) {
     .container {
-        flex-direction: column;
+        flex-direction: column-reverse;
         width: 100%;
         height: auto;
     }

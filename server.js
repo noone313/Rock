@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 
 
-app.get('/',async(req,res)=>{
+app.get('/login',async(req,res)=>{
 
 res.render('Login');
 
@@ -31,6 +31,12 @@ app.get('/register', async(req,res)=>{
 
 });
 
+app.get('/',async(req,res)=>{
+
+  res.render('studentPage');
+  
+  
+  });
 
 // all exams endpoint
 app.get('/exams',verifyToken , async(req,res)=>{    
