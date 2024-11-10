@@ -8,11 +8,28 @@ const { verifyToken, checkUserRole } = require('./middleware/authmiddleware');
 
 
 const app = express();
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.json());
 
+
+app.get('/',async(req,res)=>{
+
+res.render('Login');
+
+
+});
+
+
+app.get('/register', async(req,res)=>{
+
+  res.render('Register');
+
+
+});
 
 
 // all exams endpoint
@@ -392,13 +409,14 @@ app.post('/student-register', async(req, res) => {
 // login endpoint
 app.post('/login', async(req, res) => {
     const { email, password } = req.body;
+    
     try {
         // البحث عن المستخدم باستخدام البريد الإلكتروني
         const user = await User.findOne({ where: { email } });
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
-
+ 
         // التحقق من كلمة المرور
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
@@ -417,7 +435,7 @@ app.post('/login', async(req, res) => {
         return res.status(200).json({message : 'Login User Succesfully'})
     } catch (error) {
         console.error('Error logging in:', error);
-        return res.status(500).json({ message: 'An error occurred while logging in' });
+        return res.status(500).json({ message: 'An error occurred while logging in', error });
     }
 });
 

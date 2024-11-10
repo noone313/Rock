@@ -1,11 +1,8 @@
 const {Sequelize, DataTypes} = require('sequelize');
 
-const sequelize = new Sequelize('rock', 'postgres', 'baqerali123', {
-    dialect: 'postgres',
-    host: 'localhost',
-    port: 5432,
-  });
+const sequelize = new Sequelize('postgresql://rock_owner:xJqnMReUj3V5@ep-long-scene-a5gyvli2.us-east-2.aws.neon.tech/rock?sslmode=require');
  
+  
 
   const Department = sequelize.define("Department",{
     deptid: {
