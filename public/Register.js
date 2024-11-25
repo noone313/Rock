@@ -3,12 +3,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const btn_Register=document.getElementById('btn_Register');
        if(btn_Login){
        btn_Login.addEventListener('click',function(){
-           window.location.href='Login.html';
+           window.location.href='login';
        });}
-   
+    
        else{
        btn_Register.addEventListener('click',function(){
-           window.location.href ='Register.html';
+           window.location.href ='register';
        });}
    });
    

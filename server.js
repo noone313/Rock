@@ -23,26 +23,28 @@ res.render('Login');
 
 });
 
-
 app.get('/register', async(req,res)=>{
 
-  res.render('Register');
+  res.render('Register')
 
 
 });
 
-app.get('/',async(req,res)=>{
 
-  res.render('studentPage');
-  
-  
-  });
+app.get('/teacher-page', async(req,res)=>{
+
+   res.render('TeacherPage');
+
+
+});
+
+
 
 // all exams endpoint
 app.get('/exams',verifyToken , async(req,res)=>{    
   
   try{
-
+    
   const exam = await Exam.findAll();
   return res.status(200).json(exam)
   }catch{
@@ -53,17 +55,37 @@ app.get('/exams',verifyToken , async(req,res)=>{
 
 
 // active exams endpoint
-app.get('/active-exams', verifyToken, async(req,res)=>{
+app.get('/active-exams', verifyToken, async (req, res) => {
+  try {
     
-  try{
+    const user_name = req.user.user_name;
+    const email = req.user.email;
 
-  const exam = await Exam.findAll({ where: { examstate: 'active' } });
-  return res.status(200).json(exam)
-  }catch{
-    res.status(400).send({message:"There`s No Active Exam..."})
+    // استعلام للحصول على الامتحانات ذات الحالة "active"
+    const exams = await Exam.findAll({ where: { examstate: 'active' } });
+
+    // استخراج بيانات الامتحانات مع أسماء الأساتذة وعدد الأسئلة
+    const examData = exams.map((exam) => ({
+      examid: exam.examid,
+      examname: exam.examname,
+      examtime: exam.examtime,
+      examstate: exam.examstate,
+      professor_name: exam.professor_name,  // استخدام اسم المستخدم المستخرج من التوكن
+      questionCount: exam.question_count // استخدام حقل question_count
+    }));
+
+    console.log(examData); // يمكنك إزالة هذا السطر بعد اختبار الكود
+
+    // تمرير البيانات إلى القالب (template)
+    res.render('studentPage', { exams: examData , user_name, email});
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Error fetching active exams." });
   }
-
 });
+
+
+
 
 
 // find one exam endpoint
@@ -105,17 +127,21 @@ app.get('/exams/:id', verifyToken, async (req, res) => {
 
 
 
-app.post('/exams', verifyToken, checkUserRole('teacher'), async (req, res) => {
+app.post('/exams', verifyToken, async (req, res) => {
   try {
       const { exam, questions, options } = req.body;
       const subid = req.user.subid; // استخدام subid المستخرج من الميدل وير
+       // استخراج اسم المستخدم من التوكن
+      const professor_name = req.user.user_name;
 
       // 1. إدراج بيانات الامتحان
       const newExam = await Exam.create({
           examname: exam.examname,
           examtime: exam.examtime,
-          examstate: exam.examstate,
-          subid: subid
+          examstate: 'not active',
+          subid: subid,
+          professor_name:professor_name,
+          question_count:exam.question_count
       });
 
       // 2. إدراج الأسئلة والخيارات
@@ -413,36 +439,48 @@ app.post('/student-register', async(req, res) => {
 
 
 // login endpoint
-app.post('/login', async(req, res) => {
-    const { email, password } = req.body;
-    
-    try {
-        // البحث عن المستخدم باستخدام البريد الإلكتروني
-        const user = await User.findOne({ where: { email } });
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
- 
-        // التحقق من كلمة المرور
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
-        if (!user.subid) {
-            const token = jwt.sign({ userid: user.userid, usertype: user.usertype}, 'baqerali313');
-            res.cookie('token', token, { httpOnly: true });
-        } else{
-            const token = jwt.sign({ userid: user.userid, usertype: user.usertype, subid: user.subid }, 'baqerali313');
-            res.cookie('token', token, { httpOnly: true });
-        }
+  try {
+      // البحث عن المستخدم باستخدام البريد الإلكتروني
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+          return res.status(401).json({ message: 'Invalid email or password' });
+      }
 
-        // إرسال استجابة ناجحة
-        return res.status(200).json({message : 'Login User Succesfully'})
-    } catch (error) {
-        console.error('Error logging in:', error);
-        return res.status(500).json({ message: 'An error occurred while logging in', error });
-    }
+      // التحقق من كلمة المرور
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (!validPassword) {
+          return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      // إنشاء التوكن
+      const token = jwt.sign(
+          { 
+              userid: user.userid,
+              user_name: user.user_name,
+              email:user.email,
+              usertype: user.usertype,
+              subid: user.subid 
+          },
+          'baqerali313', // هذا هو السر (secret)
+          { expiresIn: '1h' } // التوكن سينتهي بعد ساعة
+      );
+
+      // إعدادات الكوكيز مع الأمان
+      res.cookie('token', token, {
+          httpOnly: true, // هذا يعني أن الكوكيز غير قابل للوصول عبر جافا سكربت
+          maxAge: 3600000, // مدة صلاحية الكوكيز (1 ساعة)
+          sameSite: 'Strict', // يمكن تحديد sameSite لضمان أمان الكوكيز
+      });
+
+      // إرسال استجابة ناجحة
+      return res.status(200).json({ message: 'Login User Successfully' });
+  } catch (error) {
+      console.error('Error logging in:', error);
+      return res.status(500).json({ message: 'An error occurred while logging in', error });
+  }
 });
 
 

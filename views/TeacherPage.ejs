@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Exam</title>
+    <link rel="stylesheet" href="teacherPage.css">
+</head>
+<body>
+    <div class="container">
+        <!-- قسم معلومات الامتحان -->
+        <form id="examForm" action="/exams" method="POST">
+            <h1>Create Exam</h1>
+
+            <!-- معلومات الامتحان -->
+            <div class="form-section">
+                <label for="examname">Exam Name:</label>
+                <input type="text" id="examname" name="exam[examname]" required>
+
+                <label for="examtime">Exam Time (in minutes):</label>
+                <input type="number" id="examtime" name="exam[examtime]" required>
+
+                <label for="examstate">Exam State:</label>
+                <select id="examstate" name="exam[examstate]" required>
+                    <option value="not active">Not Active</option>
+                    <option value="active">Active</option>
+                </select>
+
+                <label for="question_count">Number of Questions:</label>
+                <input type="number" id="question_count" name="exam[question_count]" required min="1">
+
+                <button type="button" id="nextButton">Continue</button>
+            </div>
+
+            <!-- قسم الأسئلة والخيارات سيتم إضافته هنا ديناميكيًا -->
+            <div id="questionsSection"></div>
+            
+            <!-- زر الحفظ -->
+            <button type="submit" id="submitButton" style="display: none;">Create Exam</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('nextButton').addEventListener('click', function() {
+            const questionCount = document.getElementById('question_count').value;
+            const questionsSection = document.getElementById('questionsSection');
+
+            // إخفاء زر الاستمرار وعرض زر الحفظ
+            document.getElementById('nextButton').style.display = 'none';
+            document.getElementById('submitButton').style.display = 'block';
+
+            // إعادة تعيين قسم الأسئلة
+            questionsSection.innerHTML = '';
+
+            // إنشاء الحقول بناءً على عدد الأسئلة المدخل
+            for (let i = 0; i < questionCount; i++) {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('question-section');
+                questionDiv.innerHTML = `
+                    <h3>Question ${i + 1}</h3>
+                    <label for="questions[${i}][qtext]">Question Text:</label>
+                    <input type="text" id="questions[${i}][qtext]" name="questions[${i}][qtext]" required>
+
+                    <label for="questions[${i}][qtype]">Question Type:</label>
+                    <select id="questions[${i}][qtype]" name="questions[${i}][qtype]" required>
+                        <option value="multiple choice">Multiple Choice</option>
+                        <option value="true/false">True/False</option>
+                        <option value="fill in the blank">Fill in the Blank</option>
+                        <option value="regular choice">Regular Choice</option>
+                        <option value="short answer">Short Answer</option>
+                    </select>
+
+                    <div class="options" id="options_${i}">
+                        <h4>Options</h4>
+                        <button type="button" onclick="addOption(${i})">Add Option</button>
+                    </div>
+                `;
+                questionsSection.appendChild(questionDiv);
+            }
+        });
+
+        function addOption(questionIndex) {
+            const optionsDiv = document.getElementById(`options_${questionIndex}`);
+            const optionCount = optionsDiv.children.length;
+            
+            const optionDiv = document.createElement('div');
+            optionDiv.classList.add('option');
+            optionDiv.innerHTML = `
+                <label for="questions[${questionIndex}][options][${optionCount}][optext]">Option ${optionCount + 1}:</label>
+                <input type="text" name="questions[${questionIndex}][options][${optionCount}][optext]" required>
+                <label for="questions[${questionIndex}][options][${optionCount}][iscorrect]">Correct?</label>
+                <input type="checkbox" name="questions[${questionIndex}][options][${optionCount}][iscorrect]">
+            `;
+            optionsDiv.appendChild(optionDiv);
+        }
+    </script>
+</body>
+</html>

@@ -34,11 +34,11 @@
             <button class="btn" ><i id="btn" class="fa-solid fa-user"></i></button>
 
                 <div class="card" id="card">
-                    <a href="#" class="logout">Sign Out</a> 
+                    <a href="/login" class="logout">Sign Out</a> 
                     <hr>
                     <i class="fa-regular fa-user"></i>
-                    <p class="user-name">syed</p> 
-                    <p class="user-email">syed@gmail.com</p> 
+                    <p class="user-name"><%= user_name %></p> 
+                    <p class="user-email"><%= email %></p> 
                 </div>
                 
         </div>
@@ -48,78 +48,25 @@
     <hr class="HR">
 
     <section id="cardss">
-
+        <!-- تكرار الامتحانات -->
+        <% exams.forEach(exam => { %>
         <div class="cards" id="cards">
-              <div class="input_card">
-               <p class="user-name">syed ali</p> 
-               <i id="icon" class="fa-solid fa-arrow-right"></i>
-              </div>
-              <div class="input_card-2">
-               <p>math</p>
-                   <div class="input-2">
-                      <p name="na">56</p>
-                   </div>
-        </div>
-        </div> <div class="cards" id="cards">
             <div class="input_card">
-             <p class="user-name">syed ali</p> 
-             <i id="icon" class="fa-solid fa-arrow-right"></i>
+                <p class="user-name"><%= exam.professor_name %></p> 
+                <a class="tag_1" href="/exams/<%= exam.examid %>"><i id="icon" class="fa-solid fa-arrow-right"></i></a>
             </div>
             <div class="input_card-2">
-             <p>math</p>
-                 <div class="input-2">
-                    <p name="na">56</p>
-                 </div>
+                <p><%= exam.examname %></p>
+                <div class="input-2">
+                    <p name="na"><%= exam.questionCount %></p>
+                </div>
             </div>
-      </div> <div class="cards" id="cards">
-        <div class="input_card">
-         <p class="user-name">syed ali</p> 
-         <i id="icon" class="fa-solid fa-arrow-right"></i>
         </div>
-        <div class="input_card-2">
-         <p>math</p>
-             <div class="input-2">
-                <p name="na">56</p>
-             </div>
-        </div>
-  </div> <div class="cards" id="cards">
-    <div class="input_card">
-     <p class="user-name">syed ali</p> 
-     <i id="icon" class="fa-solid fa-arrow-right"></i>
-    </div>
-    <div class="input_card-2">
-     <p>math</p>
-         <div class="input-2">
-            <p name="na">56</p>
-         </div>
-    </div>
-</div> <div class="cards" id="cards">
-    <div class="input_card">
-     <p class="user-name">syed ali</p> 
-     <i id="icon" class="fa-solid fa-arrow-right"></i>
-    </div>
-    <div class="input_card-2">
-     <p>math</p>
-         <div class="input-2">
-            <p name="na">56</p>
-         </div>
-    </div>
-</div> <div class="cards" id="cards">
-    <div class="input_card">
-     <p class="user-name">syed ali</p> 
-     <i id="icon" class="fa-solid fa-arrow-right"></i>
-    </div>
-    <div class="input_card-2">
-     <p>math</p>
-         <div class="input-2">
-            <p name="na">56</p>
-         </div>
-    </div>
-</div>
+        <% }) %>
     </section>
 
 
-    <script src="../public/Register.js"></script>
+    <script src="Register.js"></script>
 
 </body>
 </html>

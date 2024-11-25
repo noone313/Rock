@@ -1,20 +1,25 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models/tables'); // تأكد من تعديل المسار حسب ملف نماذجك
 
+
 const verifyToken = (req, res, next) => {
-    const token = req.cookies.token || req.headers['authorization'];
+    // التحقق من وجود الكوكيز
+    const token = req.cookies.token; 
+
     if (!token) {
-        return res.status(401).send('Token not provided');
+        return res.status(403).json({ message: 'Access denied. No token provided.' });
     }
+
     try {
-        const decoded = jwt.verify(token, 'baqerali313'); // تأكد من استخدام المفتاح السري الصحيح
-        req.user = decoded;
-        next();
-    } catch (err) {
-        console.error('Error decoding JWT:', err);
-        return res.status(400).json({ error: 'Invalid token' });
+        // فك التوكن
+        const decoded = jwt.verify(token, 'baqerali313'); // فك التوكن باستخدام السر
+        req.user = decoded; // تخزين بيانات المستخدم في `req.user`
+        next();  // الانتقال إلى الخطوة التالية
+    } catch (error) {
+        return res.status(400).json({ message: 'Invalid token.' });
     }
 };
+
 
 
 

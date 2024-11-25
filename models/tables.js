@@ -1,6 +1,6 @@
 const {Sequelize, DataTypes} = require('sequelize');
 
-const sequelize = new Sequelize('postgresql://rock_owner:xJqnMReUj3V5@ep-long-scene-a5gyvli2.us-east-2.aws.neon.tech/rock?sslmode=require');
+const sequelize = new Sequelize('postgresql://rock_owner:BE1iXewV3SND@ep-bold-night-a5dap4u2.us-east-2.aws.neon.tech/rock?sslmode=require');
  
   
 
@@ -99,30 +99,35 @@ User.belongsTo(Department, {foreignKey:'deptid'});
 
 
 const Exam = sequelize.define('Exam', {
-
-  examid:{
-    type:DataTypes.INTEGER,
-    autoIncrement:true,
-    primaryKey:true
+  examid: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  examname:{
-    type:DataTypes.STRING,
-    allowNull:false,
+  examname: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  examtime:{
-    type:DataTypes.INTEGER,
-    allowNull:false
+  examtime: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
-  examstate:{
-    type:DataTypes.STRING,
+  examstate: {
+    type: DataTypes.STRING,
     defaultValue: "not active",
-    allowNull:false
+    allowNull: false
   },
-  subid:{
-    type:DataTypes.INTEGER
+  subid: {
+    type: DataTypes.INTEGER
+  },
+  professor_name: {  // حقل اسم الأستاذ
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  question_count: {  // حقل عدد الأسئلة
+    type: DataTypes.INTEGER,
+    allowNull: true
   }
-
-
 });
 
 Subject.hasMany(Exam, { foreignKey:'subid'});
