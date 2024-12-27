@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض الإجابات</title>
+    <!-- <link rel="stylesheet" href="/styles.css"> -->
+</head>
+<body>
+
+    <h1>الإجابات المحفوظة</h1>
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>معرف الإجابة</th>
+                <th>معرف المستخدم</th>
+                <th>معرف الامتحان</th>
+                <th>معرف السؤال</th>
+                <th>معرف الخيار</th>
+                <th>الإجابة النصية</th>
+                <th>تاريخ الإنشاء</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% answers.forEach(answer => { %>
+                <tr>
+                    <td><%= answer.answerid %></td>
+                    <td><%= answer.userid %></td>
+                    <td><%= answer.examid %></td>
+                    <td><%= answer.qid %></td>
+                    <td><%= answer.optionid ? answer.optionid : 'N/A' %></td>
+                    <td><%= answer.answertext ? answer.answertext : 'N/A' %></td>
+                    <td><%= answer.createdAt %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+
+</body>
+</html>

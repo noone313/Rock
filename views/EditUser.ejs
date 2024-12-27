@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit User</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+    form {
+      background: #1f1f1f;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      background: #2b2b2b;
+      color: white;
+    }
+    button {
+      background: #ffd700;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      color: black;
+    }
+    button:hover {
+      background: #e5c400;
+    }
+  </style>
+</head>
+<body>
+  <h1>Edit User</h1>
+  <form action="/users/<%= user.userid %>?_method=PUT" method="POST">
+    <label for="user_name">Name:</label>
+    <input type="text" id="user_name" name="user_name" value="<%= user.user_name %>" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" value="<%= user.email %>" required>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" placeholder="Enter new password (leave empty to keep unchanged)">
+
+    <label for="subname">Subject:</label>
+    <select id="subname" name="subname">
+      <% subjects.forEach(subject => { %>
+        <option value="<%= subject.subname %>" <%= subject.subid === user.subid ? 'selected' : '' %> >
+          <%= subject.subname %>
+        </option>
+      <% }); %>
+    </select>
+
+    <label for="deptname">Department:</label>
+    <select id="deptname" name="deptname">
+      <% departments.forEach(department => { %>
+        <option value="<%= department.deptname %>" <%= department.deptid === user.deptid ? 'selected' : '' %> >
+          <%= department.deptname %>
+        </option>
+      <% }); %>
+    </select>
+
+    <button type="submit">Save Changes</button>
+  </form>
+</body>
+</html>

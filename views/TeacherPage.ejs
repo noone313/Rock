@@ -20,12 +20,6 @@
                 <label for="examtime">Exam Time (in minutes):</label>
                 <input type="number" id="examtime" name="exam[examtime]" required>
 
-                <label for="examstate">Exam State:</label>
-                <select id="examstate" name="exam[examstate]" required>
-                    <option value="not active">Not Active</option>
-                    <option value="active">Active</option>
-                </select>
-
                 <label for="question_count">Number of Questions:</label>
                 <input type="number" id="question_count" name="exam[question_count]" required min="1">
 
@@ -41,6 +35,7 @@
     </div>
 
     <script>
+        // التعامل مع زر "Continue"
         document.getElementById('nextButton').addEventListener('click', function() {
             const questionCount = document.getElementById('question_count').value;
             const questionsSection = document.getElementById('questionsSection');
@@ -56,7 +51,7 @@
             for (let i = 0; i < questionCount; i++) {
                 const questionDiv = document.createElement('div');
                 questionDiv.classList.add('question-section');
-                questionDiv.innerHTML = `
+                questionDiv.innerHTML = ` 
                     <h3>Question ${i + 1}</h3>
                     <label for="questions[${i}][qtext]">Question Text:</label>
                     <input type="text" id="questions[${i}][qtext]" name="questions[${i}][qtext]" required>
@@ -79,13 +74,14 @@
             }
         });
 
+        // التعامل مع إضافة خيار جديد
         function addOption(questionIndex) {
             const optionsDiv = document.getElementById(`options_${questionIndex}`);
-            const optionCount = optionsDiv.children.length;
-            
+            const optionCount = optionsDiv.querySelectorAll('.option').length;
+
             const optionDiv = document.createElement('div');
             optionDiv.classList.add('option');
-            optionDiv.innerHTML = `
+            optionDiv.innerHTML = ` 
                 <label for="questions[${questionIndex}][options][${optionCount}][optext]">Option ${optionCount + 1}:</label>
                 <input type="text" name="questions[${questionIndex}][options][${optionCount}][optext]" required>
                 <label for="questions[${questionIndex}][options][${optionCount}][iscorrect]">Correct?</label>
