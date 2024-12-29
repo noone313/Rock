@@ -148,12 +148,10 @@ app.get('/exams/:id', verifyToken, async (req, res) => {
 
 
 
-
 app.post('/answers', async (req, res) => {
   try {
     const { examid, userid, selected_option, text_answer } = req.body;
-
-    console.log(req.body); // طباعة البيانات المرسلة للمراجعة
+    console.log(req.body);
 
     // التأكد من وجود examid و userid
     if (!examid || !userid) {
@@ -161,43 +159,59 @@ app.post('/answers', async (req, res) => {
     }
 
     // معالجة الأسئلة وإجاباتها
-    for (const [qid, option] of selected_option) {
-      // جلب السؤال بناءً على qid
+    for (const [qid, options] of Object.entries(selected_option)) {
       const question = await Question.findOne({ where: { qid } });
       if (!question) {
         return res.status(404).json({ message: `Question with qid ${qid} not found.` });
       }
 
-      // إذا كانت الإجابة خيار متعدد أو خيار واحد
-      if (question.qtype === 'multiple choice' || question.qtype === 'regular choice') {
-        // تحقق من صحة الخيار المحدد
-        const validOption = await Option.findOne({ where: { opid: option, qid } });
-        if (!validOption) {
-          return res.status(400).json({ message: `Invalid option ${option} for question ${qid}.` });
-        }
+      // إذا كانت الإجابة خيار متعدد أو خيار واحد أو True/False
+      if (question.qtype === 'multiple choice' || question.qtype === 'regular choice' || question.qtype === 'true/false') {
+        if (Array.isArray(options)) {
+          // في حالة الخيارات المتعددة (Multiple Choice)
+          for (const opid of options) {
+            const validOption = await Option.findOne({ where: { opid, qid } });
+            if (!validOption) {
+              return res.status(400).json({ message: `Invalid option ${opid} for question ${qid}.` });
+            }
 
-        await Answer.create({
-          examid,
-          userid,
-          qid,
-          selected_option: option,
-          is_correct: validOption.iscorrect,
-        });
+            await Answer.create({
+              examid,
+              userid,
+              qid,
+              selected_option: opid,
+              is_correct: validOption.iscorrect,
+            });
+          }
+        } else {
+          // إذا كانت الإجابة خيار واحد (مثل True/False أو Regular Choice)
+          const validOption = await Option.findOne({ where: { opid: options, qid } });
+          if (!validOption) {
+            return res.status(400).json({ message: `Invalid option ${options} for question ${qid}.` });
+          }
+
+          await Answer.create({
+            examid,
+            userid,
+            qid,
+            selected_option: options,
+            is_correct: validOption.iscorrect,
+          });
+        }
       }
 
       // إذا كان السؤال من نوع "املأ الفراغ" (دراغ أند دروب)
       if (question.qtype === 'fill in the blank') {
-        // تحقق من صحة الخيار المرسل
-        const validOption = await Option.findOne({ where: { opid: option, qid } });
+        const validOption = await Option.findOne({ where: { opid: options, qid } });
         if (!validOption) {
-          return res.status(400).json({ message: `Invalid option ${option} for question ${qid}.` });
+          return res.status(400).json({ message: `Invalid option ${options} for question ${qid}.` });
         }
 
         await Answer.create({
           examid,
           userid,
           qid,
-          selected_option: option,
+          selected_option: options,
           is_correct: validOption.iscorrect,
         });
       }

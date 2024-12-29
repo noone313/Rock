@@ -139,22 +139,22 @@
         draggable.addEventListener('dragstart', () => {
           draggable.classList.add('dragging');
         });
-
+  
         draggable.addEventListener('dragend', () => {
           draggable.classList.remove('dragging');
         });
       });
-
+  
       dropzones.forEach(dropzone => {
         dropzone.addEventListener('dragover', (e) => {
           e.preventDefault();
           dropzone.classList.add('dragover');
         });
-
+  
         dropzone.addEventListener('dragleave', () => {
           dropzone.classList.remove('dragover');
         });
-
+  
         dropzone.addEventListener('drop', (e) => {
           e.preventDefault();
           dropzone.classList.remove('dragover');
@@ -172,33 +172,67 @@
           }
         });
       });
-
+  
       // Handle form submission
       document.querySelector('#exam-form').addEventListener('submit', (e) => {
         e.preventDefault();
-
+  
         const formData = {
           examid: document.querySelector('[name="examid"]').value,
           userid: document.querySelector('[name="userid"]').value,
-          selected_option: [],
+          selected_option: {},
           text_answer: {}
         };
-
+  
         // Gather selected options
         const selectedOptions = document.querySelectorAll('input[name^="selected_option"]');
         selectedOptions.forEach(input => {
           const qid = input.name.split('[')[1].split(']')[0];
           const opid = input.value;
-          formData.selected_option.push([qid, opid]);
+  
+          // Handle multiple choice (checkbox)
+          if (input.type === 'checkbox') {
+            if (!formData.selected_option[qid]) {
+              formData.selected_option[qid] = [];
+            }
+            if (input.checked) {
+              formData.selected_option[qid].push(opid);
+            }
+          } else {
+            // Handle regular choice (radio button)
+            if (opid) {
+              formData.selected_option[qid] = opid;
+            }
+          }
         });
-
+  
         // Gather text answers
         const textAreas = document.querySelectorAll('textarea[name^="text_answer"]');
         textAreas.forEach(textArea => {
           const qid = textArea.name.split('[')[1].split(']')[0];
           formData.text_answer[qid] = textArea.value;
         });
-
+  
+        // Handle drag-and-drop answers (fill in the blank)
+        const dropzones = document.querySelectorAll('.dropzone');
+        dropzones.forEach(dropzone => {
+          const qid = dropzone.getAttribute('data-qid');
+          const opid = dropzone.querySelector('.draggable') ? dropzone.querySelector('.draggable').getAttribute('data-opid') : null;
+          if (opid) {
+            formData.selected_option[qid] = opid;
+          }
+        });
+  
+        // Gather True/False answers (select dropdown)
+        const trueFalseSelects = document.querySelectorAll('select[name^="selected_option"]');
+        trueFalseSelects.forEach(select => {
+          const qid = select.name.split('[')[1].split(']')[0];
+          const selectedValue = select.value;
+          if (selectedValue) {
+            formData.selected_option[qid] = selectedValue;
+          }
+        });
+  
         // Send form data as JSON
         fetch('/answers', {
           method: 'POST',
@@ -217,5 +251,6 @@
       });
     });
   </script>
+  
 </body>
 </html>
