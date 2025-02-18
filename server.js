@@ -160,7 +160,7 @@ app.get('/exams/:id', verifyToken, async (req, res) => {
 
 
 
-app.get('/results', async (req, res) => {
+app.get('/results',verifyToken, async (req, res) => {
   try {
     // جلب جميع النتائج مع تفاصيل الامتحان والطالب
     const results = await Result.findAll({
@@ -181,7 +181,7 @@ app.get('/results', async (req, res) => {
 
 
 
-app.post('/answers', async (req, res) => {
+app.post('/answers',verifyToken, async (req, res) => {
   try {
     const { examid, userid, selected_option, text_answer } = req.body;
     console.log(req.body);
@@ -360,7 +360,7 @@ app.post('/exams', verifyToken, async (req, res) => {
       }
     }
 
-    res.send('ok');
+    res.redirect('/teacher-page');
   } catch (error) {
     console.error(error);
     res.status(500).send('Error creating exam');
@@ -583,7 +583,7 @@ app.post('/teacher-register', async(req, res) => {
         
         const user = await User.create({ user_name, email, password: hashedPassword, usertype : 'teacher', subid: user_subject.subid, deptid: user_department.deptid });
             
-        return res.status(200).json({ message: 'Register User Successfully' });
+        res.redirect('/teacher-page');
 
     } catch (error) {
         console.error('Error registering user:', error);
