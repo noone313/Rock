@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-const {User, Department, Subject, Question, Option, Exam,Answer} = require('./models/tables');
+const {User, Department, Subject, Question, Option, Exam,Answer,Result} = require('./models/tables');
 const { verifyToken, checkUserRole } = require('./middleware/authmiddleware');
 const methodOverride = require('method-override');
 
@@ -33,10 +33,17 @@ app.get('/register', async(req,res)=>{
 });
 
 
+app.get('/register-student', async(req,res)=>{
+
+  res.render('registerstd')
+
+
+});
+
+
 app.get('/teacher-page', async(req,res)=>{
 
    res.render('TeacherPage');
-
 
 });
 
@@ -148,27 +155,77 @@ app.get('/exams/:id', verifyToken, async (req, res) => {
 
 
 
+
+
+
+
+
+app.get('/results', async (req, res) => {
+  try {
+    // جلب جميع النتائج مع تفاصيل الامتحان والطالب
+    const results = await Result.findAll({
+      include: [
+        { model: User, attributes: ['user_name', 'email'] }, // جلب بيانات المستخدم
+        { model: Exam, attributes: ['examname'] } // جلب بيانات الامتحان
+      ],
+      order: [['createdAt', 'DESC']], // ترتيب النتائج من الأحدث إلى الأقدم
+    });
+
+    res.render('results', { results }); // تمرير البيانات إلى ملف EJS
+  } catch (error) {
+    console.error('Error fetching results:', error);
+    res.status(500).send('حدث خطأ أثناء جلب النتائج.');
+  }
+});
+
+
+
+
 app.post('/answers', async (req, res) => {
   try {
     const { examid, userid, selected_option, text_answer } = req.body;
     console.log(req.body);
 
-    // التأكد من وجود examid و userid
     if (!examid || !userid) {
       return res.status(400).json({ message: 'Missing required fields (examid or userid).' });
     }
 
-    // معالجة الأسئلة وإجاباتها
+    const correctOptions = await Option.findAll({
+      attributes: ['opid'],
+      where: { iscorrect: true },
+      include: [{
+        model: Question,
+        where: { examid },
+        attributes: []
+      }]
+    });
+
+    const correctOptionIds = correctOptions.map(option => option.opid.toString());
+    const selectedOptions = [];
+    for (const [questionId, option] of Object.entries(selected_option)) {
+      if (Array.isArray(option)) {
+        selectedOptions.push(...option);
+      } else {
+        selectedOptions.push(option);
+      }
+    }
+
+    let score = 0;
+    selectedOptions.forEach(option => {
+      if (correctOptionIds.includes(option)) {
+        score += 1;
+      }
+    });
+
+    // حفظ الإجابات في جدول Answer
     for (const [qid, options] of Object.entries(selected_option)) {
       const question = await Question.findOne({ where: { qid } });
       if (!question) {
         return res.status(404).json({ message: `Question with qid ${qid} not found.` });
       }
 
-      // إذا كانت الإجابة خيار متعدد أو خيار واحد أو True/False
       if (question.qtype === 'multiple choice' || question.qtype === 'regular choice' || question.qtype === 'true/false') {
         if (Array.isArray(options)) {
-          // في حالة الخيارات المتعددة (Multiple Choice)
           for (const opid of options) {
             const validOption = await Option.findOne({ where: { opid, qid } });
             if (!validOption) {
@@ -184,7 +241,6 @@ app.post('/answers', async (req, res) => {
             });
           }
         } else {
-          // إذا كانت الإجابة خيار واحد (مثل True/False أو Regular Choice)
           const validOption = await Option.findOne({ where: { opid: options, qid } });
           if (!validOption) {
             return res.status(400).json({ message: `Invalid option ${options} for question ${qid}.` });
@@ -200,7 +256,6 @@ app.post('/answers', async (req, res) => {
         }
       }
 
-      // إذا كان السؤال من نوع "املأ الفراغ" (دراغ أند دروب)
       if (question.qtype === 'fill in the blank') {
         const validOption = await Option.findOne({ where: { opid: options, qid } });
         if (!validOption) {
@@ -217,7 +272,6 @@ app.post('/answers', async (req, res) => {
       }
     }
 
-    // معالجة الإجابات النصية
     for (const qid in text_answer) {
       const textAnswer = text_answer[qid];
       if (!textAnswer) {
@@ -232,10 +286,31 @@ app.post('/answers', async (req, res) => {
       });
     }
 
-    res.status(201).json({ message: 'Answers saved successfully.' });
+    // **حساب درجة النجاح**
+    const totalQuestions = correctOptionIds.length; // عدد الأسئلة الصحيحة
+    const passingScore = totalQuestions * 0.5; // نسبة النجاح 50%
+    const passed = score >= passingScore; // هل اجتاز الامتحان؟
+
+    // **حفظ النتيجة في جدول Results**
+    await Result.create({
+      userid,
+      examid,
+      total_score: score,
+      passed
+    });
+
+    console.log(selectedOptions, correctOptionIds, score);
+    
+    res.status(200).json({
+      message: 'Answers and result saved successfully.',
+      selectedOptions,
+      correctOptionIds,
+      score,
+      passed
+    });
   } catch (error) {
-    console.error('Error saving answer:', error);
-    res.status(500).json({ message: 'An error occurred while saving the answer.' });
+    console.error('Error processing data:', error);
+    res.status(500).json({ message: 'An error occurred while processing the data.' });
   }
 });
 
@@ -248,12 +323,13 @@ app.post('/answers', async (req, res) => {
 
 
 
-// التعامل مع طلبات POST لإنشاء الامتحان
-app.post('/exams',verifyToken, async (req, res) => {
+
+app.post('/exams', verifyToken, async (req, res) => {
   try {
     const { exam, questions } = req.body;
     const professor_name = req.user.user_name; // استخراج اسم المستخدم من التوكن
     const subid = req.user.subid;
+
     // إنشاء الامتحان
     const newExam = await Exam.create({
       examname: exam.examname,
@@ -262,7 +338,7 @@ app.post('/exams',verifyToken, async (req, res) => {
       subid: subid,
       professor_name: professor_name,
       question_count: exam.question_count
-  });
+    });
 
     // حفظ الأسئلة
     for (let i = 0; i < questions.length; i++) {
@@ -278,7 +354,7 @@ app.post('/exams',verifyToken, async (req, res) => {
         const option = question.options[j];
         await Option.create({
           optext: option.optext,
-          iscorrect: option.iscorrect,
+          iscorrect: option.iscorrect === 'true', // تحويل القيمة إلى boolean
           qid: newQuestion.qid
         });
       }
@@ -539,7 +615,7 @@ app.post('/student-register', async(req, res) => {
         
         const user = await User.create({ user_name, email, password: hashedPassword, usertype : 'student', deptid: user_department.deptid });
             
-        return res.status(200).json({ message: 'Register User Successfully' });
+        res.redirect('/active-exams');
 
     } catch (error) {
         console.error('Error registering user:', error);
@@ -586,8 +662,15 @@ app.post('/login', async (req, res) => {
           sameSite: 'Strict', // يمكن تحديد sameSite لضمان أمان الكوكيز
       });
 
-      // إرسال استجابة ناجحة
-      return res.status(200).json({ message: 'Login User Successfully' });
+      
+       // توجيه المستخدم بناءً على نوعه
+       if (user.usertype === 'admin') {
+        res.redirect('/admin');
+    } else if (user.usertype === 'teacher') {
+        res.redirect('/teacher-page');
+    } else if (user.usertype === 'student') {
+        res.redirect('/active-exams');
+    }
   } catch (error) {
       console.error('Error logging in:', error);
       return res.status(500).json({ message: 'An error occurred while logging in', error });

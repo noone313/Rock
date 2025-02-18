@@ -252,6 +252,58 @@ Answer.belongsTo(Question, { foreignKey: 'qid' });
 
 
 
+const Result = sequelize.define("Result", {
+  resultid: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  userid: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Users', 
+      key: 'userid'
+    }
+  },
+  examid: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Exams', 
+      key: 'examid'
+    }
+  },
+  total_score: {
+    type: DataTypes.FLOAT, // درجة الطالب النهائية
+    allowNull: false
+  },
+  passed: {
+    type: DataTypes.BOOLEAN, // هل الطالب ناجح أم لا
+    allowNull: false,
+    defaultValue: false
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  }
+});
+
+// العلاقات بين الجداول
+User.hasMany(Result, { foreignKey: 'userid' });
+Result.belongsTo(User, { foreignKey: 'userid' });
+
+Exam.hasMany(Result, { foreignKey: 'examid' });
+Result.belongsTo(Exam, { foreignKey: 'examid' });
+
+
+
 sequelize.sync({ alter: true }).then(() => {
   console.log('Database Created successfully.');
 }).catch((error) => {
@@ -264,4 +316,4 @@ sequelize.sync({ alter: true }).then(() => {
 
 
 
-module.exports = { Department, User, Subject, Question, Option, Exam, Answer };
+module.exports = { Department, User, Subject, Question, Option, Exam, Answer,Result };

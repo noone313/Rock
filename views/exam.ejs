@@ -1,256 +1,394 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= exam.examname %> - Exam</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <!-- Google Fonts for a modern academic vibe -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
   <style>
-    .form-group {
-      margin-bottom: 15px;
+    /* تعريف ألوان الثيم باستخدام متغيرات CSS */
+    :root {
+      --primary-color: #007bff;       /* اللون الأزرق الأساسي */
+      --primary-hover: #0069d9;       /* عند التحويم */
+      --drag-bg: #f1f9ff;             /* خلفية لحاوية الدراج */
     }
+
+    /* Global Styles */
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      padding-top: 80px;
+    }
+    .container {
+      max-width: 900px;
+    }
+    h1,
+    .lead {
+      color: var(--primary-color);
+    }
+    /* Confirmation Message */
+    #confirmationMessage {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1050;
+      border-radius: 0;
+      font-size: 1.1rem;
+    }
+    /* Card for each question */
+    .card {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .card-header {
+      background-color: var(--primary-color);
+      color: #fff;
+      border-bottom: none;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      font-size: 1.2rem;
+    }
+    .card-body {
+      background-color: #fff;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      padding: 20px;
+    }
+    /* Radio & Checkbox Customization */
+    .form-check-input:checked {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    .form-check-input:focus {
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    /* Drag and Drop Styles - تصميم معدل */
     .drag-container {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      padding: 10px;
+      background-color: var(--drag-bg);
+      border: 1px solid var(--primary-color);
+      border-radius: 8px;
+      margin-bottom: 15px;
     }
     .draggable {
+      flex: 1;
+      min-width: 80px;
       padding: 10px;
-      background-color: #f1f1f1;
-      border: 1px solid #ddd;
-      cursor: pointer;
-      border-radius: 5px;
+      background-color: #fff;
+      border: 2px solid var(--primary-color);
+      border-radius: 6px;
+      text-align: center;
+      cursor: move;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .draggable:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     .dropzone {
       width: 100%;
-      min-height: 50px;
-      background-color: #eaeaea;
-      border: 2px dashed #ccc;
-      text-align: center;
-      line-height: 50px;
-      margin-top: 20px;
-      position: relative;
+      min-height: 80px;
+      border: 2px dashed var(--primary-color);
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ffffff, #e6f0ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      transition: background-color 0.3s, border-color 0.3s;
+      font-style: italic;
+      color: #555;
     }
-    .dragover {
-      background-color: #d3d3d3;
+    .dropzone.dragover {
+      background-color: #dceeff;
+      border-color: var(--primary-hover);
+    }
+    /* Submit Button */
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
     }
   </style>
 </head>
 <body>
-  <div class="container mt-4">
-    <h1 class="text-center"><%= exam.examname %></h1>
-    <p class="text-center">Time: <%= exam.examtime %> minutes</p>
+  <!-- Confirmation Message at the top -->
+  <div
+    id="confirmationMessage"
+    class="alert alert-success text-center mb-0"
+    role="alert"
+  >
+    تم إرسال الإجابات بنجاح!
+  </div>
+
+  <div class="container">
+    <div class="text-center mb-4">
+      <h1 class="mb-1"><%= exam.examname %></h1>
+      <p class="lead">Time: <%= exam.examtime %> minutes</p>
+    </div>
+
     <form id="exam-form" action="/answers" method="POST">
-      <input type="hidden" name="examid" value="<%= exam.examid %>">
-      <input type="hidden" name="userid" value="<%= userid %>">
+      <input type="hidden" name="examid" value="<%= exam.examid %>" />
+      <input type="hidden" name="userid" value="<%= userid %>" />
 
       <% questions.forEach((question, index) => { %>
-        <div class="mb-4">
-          <h5>Q<%= index + 1 %>: <%= question.qtext %></h5>
-
+      <div class="card">
+        <div class="card-header">
+          Q<%= index + 1 %>: <%= question.qtext %>
+        </div>
+        <div class="card-body">
           <!-- Regular Choice -->
           <% if (question.qtype === 'regular choice') { %>
-            <% question.options.forEach(option => { %>
-              <div class="form-check">
-                <input 
-                  class="form-check-input" 
-                  type="radio" 
-                  name="selected_option[<%= question.qid %>]" 
-                  value="<%= option.opid %>" 
-                  id="option-<%= option.opid %>">
-                <label class="form-check-label" for="option-<%= option.opid %>">
-                  <%= option.optext %>
-                </label>
-              </div>
-            <% }); %>
+          <% question.options.forEach(option => { %>
+          <div class="form-check mb-2">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="selected_option[<%= question.qid %>]"
+              value="<%= option.opid %>"
+              id="option-<%= option.opid %>"
+            />
+            <label class="form-check-label" for="option-<%= option.opid %>">
+              <%= option.optext %>
+            </label>
+          </div>
+          <% }); %>
 
           <!-- Multiple Choice -->
           <% } else if (question.qtype === 'multiple choice') { %>
-            <% question.options.forEach(option => { %>
-              <div class="form-check">
-                <input 
-                  class="form-check-input" 
-                  type="checkbox" 
-                  name="selected_option[<%= question.qid %>][]" 
-                  value="<%= option.opid %>"
-                  id="option-<%= option.opid %>">
-                <label class="form-check-label" for="option-<%= option.opid %>">
-                  <%= option.optext %>
-                </label>
-              </div>
-            <% }); %>
+          <% question.options.forEach(option => { %>
+          <div class="form-check mb-2">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="selected_option[<%= question.qid %>][]"
+              value="<%= option.opid %>"
+              id="option-<%= option.opid %>"
+            />
+            <label class="form-check-label" for="option-<%= option.opid %>">
+              <%= option.optext %>
+            </label>
+          </div>
+          <% }); %>
 
           <!-- True/False -->
           <% } else if (question.qtype === 'true/false') { %>
-            <div class="form-group">
-              <select 
-                class="form-select" 
-                name="selected_option[<%= question.qid %>]" 
-                required>
-                <option value="" disabled selected>Select an answer</option>
-                <% question.options.forEach(option => { %>
-                  <option value="<%= option.opid %>"><%= option.optext %></option>
-                <% }); %>
-              </select>
-            </div>
+          <div class="mb-2">
+            <select
+              class="form-select"
+              name="selected_option[<%= question.qid %>]"
+              required
+            >
+              <option value="" disabled selected>Select an answer</option>
+              <% question.options.forEach(option => { %>
+              <option value="<%= option.opid %>"><%= option.optext %></option>
+              <% }); %>
+            </select>
+          </div>
 
-          <!-- Fill in the Blank (Replaced with Drag and Drop) -->
+          <!-- Fill in the Blank (Drag and Drop) -->
           <% } else if (question.qtype === 'fill in the blank') { %>
-            <div class="form-group">
-              <label for="question-<%= question.qid %>">Select the correct answer for the blank:</label>
-              <div class="drag-container">
-                <% question.options.forEach(option => { %>
-                  <div 
-                    class="draggable" 
-                    draggable="true" 
-                    data-opid="<%= option.opid %>">
-                    <%= option.optext %>
-                  </div>
-                <% }); %>
+          <div class="mb-2">
+            <label class="form-label">اختر الإجابة الصحيحة:</label>
+            <div class="drag-container">
+              <% question.options.forEach(option => { %>
+              <div
+                class="draggable"
+                draggable="true"
+                data-opid="<%= option.opid %>"
+              >
+                <%= option.optext %>
               </div>
-              <div class="dropzone" data-qid="<%= question.qid %>">
-                <span class="placeholder">Drop here</span>
-              </div>
-              <input type="hidden" name="selected_option[<%= question.qid %>]" value="">
+              <% }); %>
             </div>
+            <div class="dropzone" data-qid="<%= question.qid %>">
+              <span class="placeholder">ضع الإجابة هنا</span>
+            </div>
+            <input
+              type="hidden"
+              name="selected_option[<%= question.qid %>]"
+              value=""
+            />
+          </div>
 
           <!-- Short Answer -->
           <% } else if (question.qtype === 'short answer') { %>
-            <textarea 
-              class="form-control" 
-              name="text_answer[<%= question.qid %>]" 
-              rows="2" 
-              placeholder="Your answer here"></textarea>
+          <div class="mb-2">
+            <textarea
+              class="form-control"
+              name="text_answer[<%= question.qid %>]"
+              rows="3"
+              placeholder="Your answer here"
+            ></textarea>
+          </div>
           <% } %>
         </div>
+      </div>
       <% }); %>
 
-      <button type="submit" class="btn btn-primary">Submit Answers</button>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary btn-lg">
+          Submit Answers
+        </button>
+      </div>
     </form>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const draggables = document.querySelectorAll('.draggable');
-      const dropzones = document.querySelectorAll('.dropzone');
-      
-      // Handle Drag and Drop events
-      draggables.forEach(draggable => {
-        draggable.addEventListener('dragstart', () => {
-          draggable.classList.add('dragging');
+    document.addEventListener("DOMContentLoaded", () => {
+      const draggables = document.querySelectorAll(".draggable");
+      const dropzones = document.querySelectorAll(".dropzone");
+
+      // Drag and Drop events
+      draggables.forEach((draggable) => {
+        draggable.addEventListener("dragstart", () => {
+          draggable.classList.add("dragging");
         });
-  
-        draggable.addEventListener('dragend', () => {
-          draggable.classList.remove('dragging');
+        draggable.addEventListener("dragend", () => {
+          draggable.classList.remove("dragging");
         });
       });
-  
-      dropzones.forEach(dropzone => {
-        dropzone.addEventListener('dragover', (e) => {
+
+      dropzones.forEach((dropzone) => {
+        dropzone.addEventListener("dragover", (e) => {
           e.preventDefault();
-          dropzone.classList.add('dragover');
+          dropzone.classList.add("dragover");
         });
-  
-        dropzone.addEventListener('dragleave', () => {
-          dropzone.classList.remove('dragover');
+        dropzone.addEventListener("dragleave", () => {
+          dropzone.classList.remove("dragover");
         });
-  
-        dropzone.addEventListener('drop', (e) => {
+        dropzone.addEventListener("drop", (e) => {
           e.preventDefault();
-          dropzone.classList.remove('dragover');
-          
-          const draggable = document.querySelector('.dragging');
+          dropzone.classList.remove("dragover");
+
+          const draggable = document.querySelector(".dragging");
           if (draggable) {
-            dropzone.innerHTML = '';
+            dropzone.innerHTML = "";
             dropzone.appendChild(draggable.cloneNode(true));
-            const qid = dropzone.getAttribute('data-qid');
-            const opid = draggable.getAttribute('data-opid');
-            const input = document.querySelector(`input[name="selected_option[${qid}]"]`);
+            const qid = dropzone.getAttribute("data-qid");
+            const opid = draggable.getAttribute("data-opid");
+            const input = document.querySelector(
+              `input[name="selected_option[${qid}]"]`
+            );
             if (input) {
-              input.value = opid; // Store the answer in the hidden input field
+              input.value = opid;
             }
           }
         });
       });
-  
-      // Handle form submission
-      document.querySelector('#exam-form').addEventListener('submit', (e) => {
+
+      // Form submission handling
+      document.querySelector("#exam-form").addEventListener("submit", (e) => {
         e.preventDefault();
-  
+
         const formData = {
           examid: document.querySelector('[name="examid"]').value,
           userid: document.querySelector('[name="userid"]').value,
           selected_option: {},
-          text_answer: {}
+          text_answer: {},
         };
-  
-        // Gather selected options
-        const selectedOptions = document.querySelectorAll('input[name^="selected_option"]');
-        selectedOptions.forEach(input => {
-          const qid = input.name.split('[')[1].split(']')[0];
+
+        // Collect selected options
+        const selectedOptions = document.querySelectorAll(
+          'input[name^="selected_option"]'
+        );
+        selectedOptions.forEach((input) => {
+          const qid = input.name.split("[")[1].split("]")[0];
           const opid = input.value;
-  
-          // Handle multiple choice (checkbox)
-          if (input.type === 'checkbox') {
+
+          if (input.type === "checkbox") {
             if (!formData.selected_option[qid]) {
               formData.selected_option[qid] = [];
             }
             if (input.checked) {
               formData.selected_option[qid].push(opid);
             }
+          } else if (input.type === "radio") {
+            if (input.checked) {
+              formData.selected_option[qid] = opid;
+            }
           } else {
-            // Handle regular choice (radio button)
             if (opid) {
               formData.selected_option[qid] = opid;
             }
           }
         });
-  
-        // Gather text answers
-        const textAreas = document.querySelectorAll('textarea[name^="text_answer"]');
-        textAreas.forEach(textArea => {
-          const qid = textArea.name.split('[')[1].split(']')[0];
+
+        // Collect text answers
+        const textAreas = document.querySelectorAll(
+          'textarea[name^="text_answer"]'
+        );
+        textAreas.forEach((textArea) => {
+          const qid = textArea.name.split("[")[1].split("]")[0];
           formData.text_answer[qid] = textArea.value;
         });
-  
+
         // Handle drag-and-drop answers (fill in the blank)
-        const dropzones = document.querySelectorAll('.dropzone');
-        dropzones.forEach(dropzone => {
-          const qid = dropzone.getAttribute('data-qid');
-          const opid = dropzone.querySelector('.draggable') ? dropzone.querySelector('.draggable').getAttribute('data-opid') : null;
+        const dZones = document.querySelectorAll(".dropzone");
+        dZones.forEach((dropzone) => {
+          const qid = dropzone.getAttribute("data-qid");
+          const opid = dropzone.querySelector(".draggable")
+            ? dropzone.querySelector(".draggable").getAttribute("data-opid")
+            : null;
           if (opid) {
             formData.selected_option[qid] = opid;
           }
         });
-  
-        // Gather True/False answers (select dropdown)
-        const trueFalseSelects = document.querySelectorAll('select[name^="selected_option"]');
-        trueFalseSelects.forEach(select => {
-          const qid = select.name.split('[')[1].split(']')[0];
+
+        // Handle select dropdown for true/false
+        const trueFalseSelects = document.querySelectorAll(
+          'select[name^="selected_option"]'
+        );
+        trueFalseSelects.forEach((select) => {
+          const qid = select.name.split("[")[1].split("]")[0];
           const selectedValue = select.value;
           if (selectedValue) {
             formData.selected_option[qid] = selectedValue;
           }
         });
-  
+
         // Send form data as JSON
-        fetch('/answers', {
-          method: 'POST',
+        fetch("/answers", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(formData),
         })
-        .then(response => response.json())
-        .then(data => {
-          console.log('Form submitted successfully:', data);
-        })
-        .catch(error => {
-          console.error('Error submitting form:', error);
-        });
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Form submitted successfully:", data);
+            const confirmationDiv = document.getElementById(
+              "confirmationMessage"
+            );
+            confirmationDiv.style.display = "block";
+            confirmationDiv.textContent = "تم إرسال الإجابات بنجاح!";
+          })
+          .catch((error) => {
+            console.error("Error submitting form:", error);
+          });
       });
     });
   </script>
-  
 </body>
 </html>

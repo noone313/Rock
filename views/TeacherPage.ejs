@@ -85,9 +85,17 @@
                 <label for="questions[${questionIndex}][options][${optionCount}][optext]">Option ${optionCount + 1}:</label>
                 <input type="text" name="questions[${questionIndex}][options][${optionCount}][optext]" required>
                 <label for="questions[${questionIndex}][options][${optionCount}][iscorrect]">Correct?</label>
-                <input type="checkbox" name="questions[${questionIndex}][options][${optionCount}][iscorrect]">
+                <input type="checkbox" class="iscorrect-checkbox" data-question="${questionIndex}" data-option="${optionCount}">
+                <input type="hidden" name="questions[${questionIndex}][options][${optionCount}][iscorrect]" value="false">
             `;
             optionsDiv.appendChild(optionDiv);
+
+            // إضافة حدث تغيير للـ checkbox
+            const checkbox = optionDiv.querySelector('.iscorrect-checkbox');
+            const hiddenInput = optionDiv.querySelector('input[type="hidden"]');
+            checkbox.addEventListener('change', function() {
+                hiddenInput.value = this.checked ? 'true' : 'false';
+            });
         }
     </script>
 </body>
