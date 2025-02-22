@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المواد الدراسية</title>
+  <style>
+    :root {
+      --primary-color: #007bff; /* اللون الأزرق */
+      --primary-hover: #0056b3; /* اللون الأزرق الغامق عند التمرير */
+      --background-color: #f8f9fa; /* اللون الخلفي الفاتح */
+      --text-color: #333; /* لون النص */
+      --form-background: #ffffff; /* لون الخلفية للنموذج */
+      --table-border: #ccc; /* لون حدود الجدول */
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: var(--form-background);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid var(--table-border);
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    a:hover {
+      color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>قائمة المواد الدراسية</h1>
+
+    <% if (message) { %>
+      <p style="text-align: center; color: red;"><%= message %></p>
+    <% } else { %>
+
+    <table>
+      <thead>
+        <tr>
+          <th>رقم المادة</th>
+          <th>اسم المادة</th>
+          <th>مرحلة التدريس للمادة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% subjects.forEach(subject => { %>
+          <tr>
+            <td><%= subject.subid %></td>
+            <td><a href="/subjects/<%= subject.subid %>"><%= subject.subname %></a></td>
+            <td><%= subject.substage %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <% } %>
+  </div>
+</body>
+</html>

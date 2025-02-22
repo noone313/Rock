@@ -1,80 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit User</title>
+  <title>تعديل بيانات المستخدم</title>
   <style>
+    /* تعريف ألوان الثيم */
+    :root {
+      --primary-color: #007bff;
+      --primary-hover: #0069d9;
+      --background-color: #f8f9fa;
+      --text-color: #333;
+      --form-background: #ffffff;
+      --input-background: #ffffff;
+    }
     body {
       font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: white;
+      background-color: var(--background-color);
+      color: var(--text-color);
       margin: 0;
       padding: 20px;
     }
-    form {
-      background: #1f1f1f;
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background-color: var(--form-background);
       padding: 20px;
       border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
     }
     label {
-      display: block;
       margin-bottom: 5px;
+      font-weight: bold;
     }
     input, select {
       width: 100%;
       padding: 10px;
       margin-bottom: 15px;
-      border: 1px solid #555;
+      border: 1px solid #ccc;
       border-radius: 4px;
-      background: #2b2b2b;
-      color: white;
+      background-color: var(--input-background);
+      color: var(--text-color);
+      font-size: 16px;
     }
     button {
-      background: #ffd700;
+      background-color: var(--primary-color);
       border: none;
       padding: 10px 20px;
       border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
-      color: black;
+      color: white;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
     }
     button:hover {
-      background: #e5c400;
+      background-color: var(--primary-hover);
     }
   </style>
 </head>
 <body>
-  <h1>Edit User</h1>
-  <form action="/users/<%= user.userid %>?_method=PUT" method="POST">
-    <label for="user_name">Name:</label>
-    <input type="text" id="user_name" name="user_name" value="<%= user.user_name %>" required>
+  <div class="container">
+    <h1>تعديل بيانات المستخدم</h1>
+    <form action="/users/<%= user.userid %>?_method=PUT" method="POST">
+      <label for="user_name">الاسم:</label>
+      <input type="text" id="user_name" name="user_name" value="<%= user.user_name %>" required>
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" value="<%= user.email %>" required>
+      <label for="email">البريد الإلكتروني:</label>
+      <input type="email" id="email" name="email" value="<%= user.email %>" required>
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" placeholder="Enter new password (leave empty to keep unchanged)">
+      <label for="password">كلمة المرور:</label>
+      <input type="password" id="password" name="password" placeholder="أدخل كلمة مرور جديدة (اتركها فارغة للإبقاء على القديمة)">
 
-    <label for="subname">Subject:</label>
-    <select id="subname" name="subname">
-      <% subjects.forEach(subject => { %>
-        <option value="<%= subject.subname %>" <%= subject.subid === user.subid ? 'selected' : '' %> >
-          <%= subject.subname %>
-        </option>
-      <% }); %>
-    </select>
+      <label for="subname">المادة الدراسية:</label>
+      <select id="subname" name="subname">
+        <% subjects.forEach(subject => { %>
+          <option value="<%= subject.subname %>" <%= subject.subid === user.subid ? 'selected' : '' %> >
+            <%= subject.subname %>
+          </option>
+        <% }); %>
+      </select>
 
-    <label for="deptname">Department:</label>
-    <select id="deptname" name="deptname">
-      <% departments.forEach(department => { %>
-        <option value="<%= department.deptname %>" <%= department.deptid === user.deptid ? 'selected' : '' %> >
-          <%= department.deptname %>
-        </option>
-      <% }); %>
-    </select>
+      <label for="deptname">القسم الجامعي:</label>
+      <select id="deptname" name="deptname">
+        <% departments.forEach(department => { %>
+          <option value="<%= department.deptname %>" <%= department.deptid === user.deptid ? 'selected' : '' %> >
+            <%= department.deptname %>
+          </option>
+        <% }); %>
+      </select>
 
-    <button type="submit">Save Changes</button>
-  </form>
+      <button type="submit">حفظ التغييرات</button>
+    </form>
+  </div>
 </body>
 </html>

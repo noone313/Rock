@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تعديل بيانات الامتحان</title>
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --primary-hover: #0069d9;
+      --background-color: #f8f9fa;
+      --text-color: #333;
+      --form-background: #ffffff;
+      --input-background: #ffffff;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background-color: var(--form-background);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: var(--input-background);
+      color: var(--text-color);
+      font-size: 16px;
+    }
+    button {
+      background-color: var(--primary-color);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>تعديل بيانات الامتحان</h1>
+    <form id="examForm">
+      <label for="examname">اسم الامتحان:</label>
+      <input type="text" id="examname" name="examname" value="<%= exam.examname %>" required>
+
+      <label for="examtime">وقت الامتحان:</label>
+      <input type="text" id="examtime" name="examtime" value="<%= exam.examtime %>" required>
+
+      <label for="examstate">حالة الامتحان:</label>
+      <select id="examstate" name="examstate">
+        <option value="active" <%= exam.examstate === 'active' ? 'selected' : '' %>>active</option>
+        <option value="not active" <%= exam.examstate === 'not active' ? 'selected' : '' %>>not active</option>
+      </select>
+
+      <button type="submit">حفظ التعديلات</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('examForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const examId = "<%= exam.examid %>";
+      const examname = document.getElementById("examname").value.trim();
+      const examtime = document.getElementById("examtime").value.trim();
+      const examstate = document.getElementById("examstate").value;
+
+      if (!examname || !examtime) {
+        alert("يرجى ملء جميع الحقول");
+        return;
+      }
+
+      const response = await fetch(`/exams/${examId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ examname, examtime, examstate })
+      });
+
+      if (response.ok) {
+        alert("تم تحديث الامتحان بنجاح!");
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        alert("خطأ: " + errorData.error);
+        console.error("Error updating exam:", errorData);
+      }
+
+    });
+  </script>
+</body>
+</html>

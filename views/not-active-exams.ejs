@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الامتحانات غير النشطة</title>
+  <style>
+    :root {
+      --primary-color: #dc3545;
+      --primary-hover: #c82333;
+      --background-color: #f8f9fa;
+      --text-color: #333;
+      --form-background: #ffffff;
+      --input-background: #ffffff;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: var(--form-background);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>الامتحانات غير النشطة</h1>
+
+    <% if (message) { %>
+      <p style="text-align: center; color: red;"><%= message %></p>
+    <% } else { %>
+
+    <table>
+      <thead>
+        <tr>
+          <th>رقم الامتحان</th>
+          <th>اسم الامتحان</th>
+          <th>وقت الامتحان</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% exams.forEach(exam => { %>
+          <tr>
+            <td><%= exam.examid %></td>
+            <td><a href="/exam/<%= exam.examid %>"><%= exam.examname %></a></td>
+            <td><%= exam.examtime %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <% } %>
+  </div>
+</body>
+</html>

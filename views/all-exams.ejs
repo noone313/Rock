@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>عرض جميع الامتحانات</title>
+  <style>
+    /* تعريف ألوان الثيم */
+    :root {
+      --primary-color: #007bff;
+      --primary-hover: #0069d9;
+      --background-color: #f8f9fa;
+      --text-color: #333;
+      --form-background: #ffffff;
+      --input-background: #ffffff;
+      --danger-color: #dc3545;
+      --danger-hover: #c82333;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: var(--form-background);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: var(--form-background);
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: center;
+    }
+    th {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .delete-btn {
+      background-color: var(--danger-color);
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+    .delete-btn:hover {
+      background-color: var(--danger-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>قائمة الامتحانات</h1>
+
+    <% if (typeof message !== "undefined" && message) { %>
+      <p style="text-align: center; color: var(--danger-color);"><%= message %></p>
+    <% } %>
+
+    <table>
+      <thead>
+        <tr>
+          <th>رقم الامتحان</th>
+          <th>اسم الامتحان</th>
+          <th>الحالة</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (exams.length > 0) { %>
+          <% exams.forEach(exam => { %>
+            <tr>
+              <td><%= exam.examid %></td>
+              <td><a href="/exam/<%= exam.examid %>"><%= exam.examname %></a></td>
+              <td><%= exam.examstate %></td>
+              <td>
+                <button class="delete-btn" onclick="deleteExam('<%= exam.examid %>')">حذف</button>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr>
+            <td colspan="4">لا توجد امتحانات متاحة</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function deleteExam(examId) {
+      if (confirm("هل أنت متأكد من حذف هذا الامتحان؟")) {
+        fetch(`/exams/${examId}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" }
+        })
+        .then(response => {
+          if (response.ok) {
+            alert("تم حذف الامتحان بنجاح!");
+            window.location.reload();
+          } else {
+            alert("فشل في حذف الامتحان.");
+          }
+        })
+        .catch(error => console.error("Error:", error));
+      }
+    }
+  </script>
+</body>
+</html>

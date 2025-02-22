@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الأقسام</title>
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --primary-hover: #0056b3;
+      --background-color: #f8f9fa;
+      --text-color: #333;
+      --form-background: #ffffff;
+      --table-border: #ccc;
+      --danger-color: #dc3545;
+      --danger-hover: #b02a37;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: var(--form-background);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid var(--table-border);
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .delete-btn {
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .delete-btn:hover {
+      background-color: var(--danger-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>قائمة الأقسام</h1>
+
+    <% if (message) { %>
+      <p style="text-align: center; color: red;"><%= message %></p>
+    <% } else { %>
+
+    <table>
+      <thead>
+        <tr>
+          <th>رقم القسم</th>
+          <th>اسم القسم</th>
+          <th>عدد مراحل القسم</th>
+          <th>إجراء</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% departments.forEach(department => { %>
+          <tr id="row-<%= department.deptid %>">
+            <td><%= department.deptid %></td>
+            <td><a href="/departments/<%= department.deptid %>"><%= department.deptname %></a></td>
+            <td><%= department.deptstages %></td>
+            <td>
+              <button class="delete-btn" onclick="deleteDepartment('<%= department.deptid %>')">حذف</button>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <% } %>
+  </div>
+
+  <script>
+    async function deleteDepartment(deptId) {
+      const confirmDelete = confirm("هل أنت متأكد من حذف هذا القسم؟");
+      if (!confirmDelete) return;
+
+      try {
+        const response = await fetch(`/departments/${deptId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(result.message);
+          document.getElementById(`row-${deptId}`).remove(); // إزالة الصف من الجدول
+        } else {
+          alert(result.error || "فشل الحذف. الرجاء المحاولة مرة أخرى.");
+        }
+      } catch (error) {
+        console.error("Error deleting department:", error);
+        alert("حدث خطأ أثناء الحذف.");
+      }
+    }
+  </script>
+
+</body>
+</html>

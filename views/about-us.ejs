@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About the Exam System - Al-Rafidain University College</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3B82F6;
+      --primary-hover: #2563EB;
+      --background: #F8FAFC;
+      --surface: #FFFFFF;
+      --text: #1E293B;
+      --accent: #93C5FD;
+      --border: #E2E8F0;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+      direction: ltr;
+    }
+    header {
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 1rem 2rem;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 100;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 0 1rem;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+    .nav-links li a {
+      text-decoration: none;
+      color: var(--text);
+      font-size: 1rem;
+      transition: color 0.3s;
+    }
+    .nav-links li a:hover {
+      color: var(--primary);
+    }
+    main {
+      margin-top: 80px;
+    }
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: var(--surface);
+      padding: 4rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      background: url('https://via.placeholder.com/1200x800') no-repeat center center/cover;
+      opacity: 0.15;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* About the System */
+    .about-system {
+      padding: 4rem 2rem;
+      background: var(--surface);
+      text-align: center;
+    }
+    .about-system h2 {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+    .about-system p {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* Features */
+    .features {
+      padding: 4rem 2rem;
+      background: var(--background);
+    }
+    .features h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 2rem;
+      font-size: 2rem;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    .feature-item {
+      text-align: center;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      background: var(--surface);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .feature-item:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+    .feature-item i {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+    .feature-item h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .feature-item p {
+      font-size: 1rem;
+      color: var(--text);
+    }
+    /* Call to Action */
+    .cta {
+      padding: 4rem 2rem;
+      background: var(--background);
+      text-align: center;
+    }
+    .cta h2 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+    .cta p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    .cta a {
+      text-decoration: none;
+      padding: 0.75rem 1.5rem;
+      border: 2px solid var(--primary);
+      border-radius: 0.5rem;
+      font-size: 1.1rem;
+      transition: background 0.3s, color 0.3s;
+      color: var(--primary);
+    }
+    .cta a:hover {
+      background: var(--primary);
+      color: var(--surface);
+    }
+    /* Footer */
+    footer {
+      background: var(--surface);
+      padding: 2rem;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      .hero p {
+        font-size: 1rem;
+      }
+      .about-system h2 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header with Navigation -->
+  <header>
+    <div class="container">
+      <nav>
+        <a href="#" class="logo">Exam System</a>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="#">Services</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Exam System</h1>
+        <p>A comprehensive solution for managing and organizing exams for Al-Rafidain University College students.</p>
+      </div>
+    </section>
+    
+    <!-- About the System Section -->
+    <section class="about-system">
+      <h2>About the System</h2>
+      <p>The Exam System is an advanced electronic platform designed to facilitate effective exam management for students of Al-Rafidain University College.</p>
+      <p>It provides features such as exam scheduling, result management, and performance analysis tools.</p>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="container">
+        <h2>System Features</h2>
+        <div class="features-grid">
+          <div class="feature-item">
+            <i class="fas fa-user-check"></i>
+            <h3>User-Friendly Interface</h3>
+            <p>Intuitive design allowing easy navigation for students and faculty.</p>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-lock"></i>
+            <h3>Data Security</h3>
+            <p>Advanced security measures to ensure data confidentiality.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <footer>
+    <p>&copy; 2025 Exam System - Al-Rafidain University College.</p>
+  </footer>
+</body>
+</html>

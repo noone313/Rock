@@ -36,17 +36,14 @@ const Subject = sequelize.define("Subject", {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  subtype: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
+  
   deptid: {
     type: DataTypes.INTEGER,
   }
 
 });
 
-Department.hasMany(Subject, { foreignKey: 'deptid' })
+Department.hasMany(Subject, { foreignKey: 'deptid',  onDelete: 'CASCADE' })
 Subject.belongsTo(Department, { foreignKey: 'deptid' })
 
 
@@ -90,10 +87,10 @@ const User = sequelize.define("User", {
 
 });
 
-Subject.hasMany(User, { foreignKey: 'subid' });
+Subject.hasMany(User, { foreignKey: 'subid', onDelete: 'CASCADE' });
 User.belongsTo(Subject, { foreignKey: 'subid' });
 
-Department.hasMany(User, { foreignKey: 'deptid' });
+Department.hasMany(User, { foreignKey: 'deptid', onDelete: 'CASCADE' });
 User.belongsTo(Department, { foreignKey: 'deptid' });
 
 
@@ -130,7 +127,7 @@ const Exam = sequelize.define('Exam', {
   }
 });
 
-Subject.hasMany(Exam, { foreignKey: 'subid' });
+Subject.hasMany(Exam, { foreignKey: 'subid', onDelete: 'CASCADE' });
 Exam.belongsTo(Subject, { foreignKey: 'subid' })
 
 
@@ -155,7 +152,7 @@ const Question = sequelize.define('Question', {
 
 });
 
-Exam.hasMany(Question, { foreignKey: 'examid' })
+Exam.hasMany(Question, { foreignKey: 'examid', onDelete: 'CASCADE' })
 Question.belongsTo(Exam, { foreignKey: 'examid' })
 
 
@@ -180,7 +177,7 @@ const Option = sequelize.define('Option', {
 
 });
 
-Question.hasMany(Option, { foreignKey: 'qid' });
+Question.hasMany(Option, { foreignKey: 'qid', onDelete: 'CASCADE' });
 Option.belongsTo(Question, { foreignKey: 'qid' });
 
 
@@ -241,13 +238,13 @@ const Answer = sequelize.define('Answer', {
 });
 
 // العلاقات
-User.hasMany(Answer, { foreignKey: 'userid' });
+User.hasMany(Answer, { foreignKey: 'userid', onDelete: 'CASCADE' });
 Answer.belongsTo(User, { foreignKey: 'userid' });
 
-Exam.hasMany(Answer, { foreignKey: 'examid' });
+Exam.hasMany(Answer, { foreignKey: 'examid', onDelete: 'CASCADE' });
 Answer.belongsTo(Exam, { foreignKey: 'examid' });
 
-Question.hasMany(Answer, { foreignKey: 'qid' });
+Question.hasMany(Answer, { foreignKey: 'qid', onDelete: 'CASCADE' });
 Answer.belongsTo(Question, { foreignKey: 'qid' });
 
 
@@ -296,10 +293,10 @@ const Result = sequelize.define("Result", {
 });
 
 // العلاقات بين الجداول
-User.hasMany(Result, { foreignKey: 'userid' });
+User.hasMany(Result, { foreignKey: 'userid', onDelete: 'CASCADE' });
 Result.belongsTo(User, { foreignKey: 'userid' });
 
-Exam.hasMany(Result, { foreignKey: 'examid' });
+Exam.hasMany(Result, { foreignKey: 'examid', onDelete: 'CASCADE' });
 Result.belongsTo(Exam, { foreignKey: 'examid' });
 
 

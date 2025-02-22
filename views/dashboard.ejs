@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم الإدارية</title>
+  <style>
+    :root {
+      --primary: hsl(217, 91%, 60%);
+      --primary-hover: hsl(221, 83%, 53%);
+      --surface-1: hsl(0, 0%, 100%);
+      --surface-2: hsl(210, 40%, 98%);
+      --text-primary: hsl(224, 30%, 27%);
+      --text-secondary: hsl(215, 16%, 47%);
+      --border: hsl(214, 32%, 91%);
+      --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --radius-lg: 1.25rem;
+      --radius-md: 0.875rem;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    @font-face {
+      font-family: 'Inter';
+      src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    }
+
+    body {
+      background: var(--surface-2);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(250px, 300px) 1fr;
+      gap: 2.5rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* الشريط الجانبي - النسخة النهائية */
+    .sidebar {
+      background: var(--surface-1);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 2rem;
+      height: fit-content;
+      border: 1px solid var(--border);
+    }
+
+    .sidebar-header {
+      padding-bottom: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-header h2 {
+      font-size: 1.375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 0 0.5rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.25rem;
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      background: transparent;
+      border: 1px solid transparent;
+    }
+
+    .nav-link:hover {
+      background: hsl(217, 91%, 96%);
+      border-color: var(--border);
+      transform: translateX(8px);
+    }
+
+    .nav-link.active {
+      background: var(--primary);
+      color: white !important;
+    }
+
+    .nav-link.active:hover {
+      background: var(--primary-hover);
+    }
+
+    /* المحتوى الرئيسي - النسخة النهائية */
+    .content {
+      background: var(--surface-1);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+
+    .content-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .content-header h1 {
+      font-size: 2.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      line-height: 1.2;
+    }
+
+    .content-header p {
+      color: var(--text-secondary);
+      font-size: 1.0625rem;
+      max-width: 600px;
+    }
+
+    /* نظام البطاقات المحسن */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+      gap: 1.75rem;
+    }
+
+    .card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius-lg) - 4px);
+      padding: 2rem 1.75rem;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px -6px rgba(0,0,0,0.08);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--primary);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-icon {
+      font-size: 2.75rem;
+      margin-bottom: 1.25rem;
+      color: var(--primary);
+      filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.15));
+    }
+
+    .card-title {
+      font-size: 1.375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .card-description {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--primary);
+      color: white;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: all 0.25s;
+      font-weight: 500;
+      border: 2px solid transparent;
+    }
+
+    .card-action:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      
+      .sidebar {
+        position: static;
+      }
+      
+      .content {
+        padding: 1.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .content-header h1 {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- الشريط الجانبي -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>🎛️ لوحة التحكم</h2>
+      </div>
+      <nav>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="/users" class="nav-link active">
+              <span>👥</span> إدارة المستخدمين
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/not-active-users" class="nav-link">
+              <span>👥</span> إدارة المستخدمين الغير نشطين
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/exams" class="nav-link">
+              <span>📝</span> إدارة الامتحانات
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/not-active-exams" class="nav-link">
+              <span>👥</span> إدارة الامتحانات الغير نشطة
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/questions" class="nav-link">
+              <span>❓</span> إدارة الأسئلة
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/departments" class="nav-link">
+              <span>🏛️</span> إدارة الأقسام
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/subjects" class="nav-link">
+              <span>📚</span> إدارة المواد
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="content">
+      <div class="content-header">
+        <h1>مرحبًا بك في مركز التحكم</h1>
+        <p>إدارة كافة جوانب النظام التعليمي بكل كفاءة وأمان من خلال الأدوات المتاحة</p>
+      </div>
+
+      <div class="card-grid">
+        <!-- بطاقة إدارة الأقسام -->
+        <div class="card">
+          <div class="card-icon">🏛️</div>
+          <h3 class="card-title">الأقسام الجامعية</h3>
+          <p class="card-description">إضافة التخصصات الجديد </p>
+          <a href="/departments" class="card-action">
+            اضافة →
+          </a>
+        </div>
+
+        <!-- بطاقة إدارة المواد -->
+        <div class="card">
+          <div class="card-icon">📚</div>
+          <h3 class="card-title">المواد الدراسية</h3>
+          <p class="card-description">اضافة مواد دراسية جديدة</p>
+          <a href="/subjects" class="card-action">
+            اضافة →
+          </a>
+        </div>
+
+        <!-- بطاقة إدارة المستخدمين -->
+        <div class="card">
+          <div class="card-icon">👥</div>
+          <h3 class="card-title">المستخدمون</h3>
+          <p class="card-description">اضافة مستخدمين جدد</p>
+          <a href="/users" class="card-action">
+            اضافة → 
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

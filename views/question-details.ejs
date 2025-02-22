@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل السؤال</title>
+  <style>
+    :root {
+      --primary-color: #28a745;
+      --primary-hover: #218838;
+      --secondary-color: #6c757d;
+      --secondary-hover: #5a6268;
+      --background-color: #f8f9fa;
+      --text-color: #333;
+      --form-background: #ffffff;
+      --table-border: #ccc;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: var(--form-background);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .back-btn {
+      display: inline-block;
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: background-color 0.3s;
+    }
+    
+    .back-btn:hover {
+      background-color: var(--secondary-hover);
+    }
+    
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-top: 0;
+    }
+    
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid var(--table-border);
+      border-radius: 4px;
+    }
+    
+    .option-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    
+    .submit-btn {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 10px;
+      margin-top: 20px;
+    }
+    
+    .submit-btn:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- زر العودة -->
+    <a href="/questions" class="back-btn">
+      ‹ العودة إلى الأسئلة
+    </a>
+
+    <h1>تفاصيل السؤال</h1>
+
+    <% if (message) { %>
+      <p style="text-align: center; color: red;"><%= message %></p>
+    <% } else { %>
+      <form id="questionForm">
+        <input type="hidden" id="questionId" value="<%= question.qid %>">
+
+        <!-- نص السؤال -->
+        <label for="questionText">نص السؤال:</label>
+        <input type="text" id="questionText" name="questionText" value="<%= question.qtext %>" required>
+
+        <!-- الخيارات -->
+        <h3>الخيارات:</h3>
+        <% question.Options.forEach((option, index) => { %>
+          <div class="option-container">
+            <label for="option<%= index %>">الخيار <%= index + 1 %>:</label>
+            <input 
+              type="text" 
+              id="option<%= index %>" 
+              name="options[]" 
+              value="<%= option.optext %>" 
+              required
+            >
+            <input 
+              type="checkbox" 
+              name="correctOption" 
+              value="<%= option.opid %>" 
+              data-oidx="<%= index %>" 
+              <% if (option.iscorrect) { %> checked <% } %>
+            > صحيح
+          </div>
+        <% }); %>
+
+        <button type="submit" class="submit-btn">حفظ التعديلات</button>
+      </form>
+    <% } %>
+  </div>
+
+  <!-- باقي الكود بدون تغيير -->
+  <script>
+    document.getElementById('questionForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const questionId = document.getElementById("questionId").value;
+      const questionText = document.getElementById("questionText").value.trim();
+      const options = Array.from(document.querySelectorAll('input[name="options[]"]')).map(input => input.value.trim());
+      
+      // جمع الخيارات الصحيحة
+      const correctOptionIds = Array.from(document.querySelectorAll('input[name="correctOption"]'))
+        .map(checkbox => ({
+          oid: checkbox.value,
+          oidx: checkbox.dataset.oidx,
+          iscorrect: checkbox.checked
+        }));
+
+      if (!questionText || options.some(opt => !opt)) {
+        alert("يرجى ملء جميع الحقول");
+        return;
+      }
+
+      const response = await fetch(`/questions/${questionId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          text: questionText, 
+          options, 
+          correctOptionIds 
+        })
+      });
+
+      if (response.ok) {
+        alert("تم تحديث السؤال بنجاح!");
+        window.location.reload();
+      } else {
+        alert("حدث خطأ أثناء التحديث.");
+      }
+    });
+  </script>
+</body>
+</html>

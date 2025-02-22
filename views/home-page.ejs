@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام الامتحانات - كلية الرافدين الجامعة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3B82F6;
+      --primary-hover: #2563EB;
+      --background: #F8FAFC;
+      --surface: #FFFFFF;
+      --text: #1E293B;
+      --accent: #93C5FD;
+      --border: #E2E8F0;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+      direction: rtl;
+    }
+    header {
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 1rem 2rem;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+  height: 90px; /* ارتفاع الشعار */
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 100%;
+  width: auto;
+  max-height: 90px; /* أقصى ارتفاع للشعار */
+}
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 0 1rem;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+   
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+    .nav-links li a {
+      text-decoration: none;
+      color: var(--text);
+      font-size: 1rem;
+      transition: color 0.3s;
+    }
+    .nav-links li a:hover {
+      color: var(--primary);
+    }
+    main {
+      margin-top: 80px;
+    }
+    /* قسم البطل (Hero) */
+    .hero {
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: var(--surface);
+      padding: 4rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      background: url('https://via.placeholder.com/1200x800') no-repeat center center/cover;
+      opacity: 0.15;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .hero .buttons a {
+      text-decoration: none;
+      padding: 0.75rem 1.5rem;
+      border: 2px solid var(--surface);
+      border-radius: 0.5rem;
+      font-size: 1.1rem;
+      transition: background 0.3s, color 0.3s;
+    }
+    .hero .buttons a.login {
+      background: var(--surface);
+      color: var(--primary);
+    }
+    .hero .buttons a.login:hover {
+      background: var(--primary);
+      color: var(--surface);
+    }
+    .hero .buttons a.register {
+      background: transparent;
+      color: var(--surface);
+    }
+    .hero .buttons a.register:hover {
+      background: var(--primary-hover);
+    }
+    /* قسم المزايا (Features) */
+    .features {
+      padding: 4rem 2rem;
+      background: var(--surface);
+    }
+    .features h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 2rem;
+      font-size: 2rem;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    .feature-item {
+      text-align: center;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      background: var(--background);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .feature-item:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+    .feature-item i {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+    .feature-item h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .feature-item p {
+      font-size: 1rem;
+      color: var(--text);
+    }
+    /* قسم الدعوة لاتخاذ إجراء (CTA) */
+    .cta {
+      padding: 4rem 2rem;
+      background: var(--background);
+      text-align: center;
+    }
+    .cta h2 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+    .cta p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    .cta a {
+      text-decoration: none;
+      padding: 0.75rem 1.5rem;
+      border: 2px solid var(--primary);
+      border-radius: 0.5rem;
+      font-size: 1.1rem;
+      transition: background 0.3s, color 0.3s;
+      color: var(--primary);
+    }
+    .cta a:hover {
+      background: var(--primary);
+      color: var(--surface);
+    }
+    /* التذييل (Footer) */
+    footer {
+      background: var(--surface);
+      padding: 2rem;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      .hero p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- الهيدر مع شريط التنقل -->
+  <header>
+    <div class="container">
+      <nav>
+        <a href="/" class="logo">
+            <img src="/image/rock-logo.png" alt="شعار الكلية" class="logo-img">
+        </a>
+        <ul class="nav-links">
+          <li><a href="/">الرئيسية</a></li>
+          <li><a href="/about-us">عن النظام</a></li>
+          <li><a href="#">الخدمات</a></li>
+          <li><a href="#">تواصل معنا</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  
+  <main>
+    <!-- قسم البطل (Hero) -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>مرحباً بكم في نظام الامتحانات</h1>
+        <p>نظام امتحاني متكامل مُصمم خصيصاً لطلبة كلية الرافدين الجامعة، يوفر أدوات ذكية لإدارة وتنظيم الامتحانات بشكل فعال وسهل الاستخدام.</p>
+        <div class="buttons">
+          <a href="/login" class="login">تسجيل الدخول</a>
+          <a href="/register-student" class="register">التسجيل</a>
+        </div>
+      </div>
+    </section>
+    
+    <!-- قسم المزايا (Features) -->
+    <section class="features">
+      <div class="container">
+        <h2>ما نقدمه</h2>
+        <div class="features-grid">
+          <div class="feature-item">
+            <i class="fas fa-user-check"></i>
+            <h3>سهولة الاستخدام</h3>
+            <p>واجهة مستخدم بديهية تضمن سهولة التنقل والوصول إلى كافة خدمات النظام.</p>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-lock"></i>
+            <h3>أمان عالي</h3>
+            <p>أنظمة حماية متطورة لضمان سرية وخصوصية بيانات المستخدمين.</p>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-tachometer-alt"></i>
+            <h3>أداء سريع</h3>
+            <p>تقنيات حديثة لضمان سرعة في تنفيذ العمليات وتحميل المحتوى بشكل فوري.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- قسم الدعوة لاتخاذ إجراء (Call To Action) -->
+    <section class="cta">
+      <div class="container">
+        <h2>ابدأ تجربتك معنا اليوم!</h2>
+        <p>انضم الآن إلى نظام الامتحانات المبتكر لطلبة كلية الرافدين الجامعة وتمتع بميزات حصرية تسهل عليك إدارة امتحاناتك بكفاءة عالية.</p>
+        <a href="/register-student">سجل الآن</a>
+      </div>
+    </section>
+  </main>
+  
+  <!-- التذييل (Footer) -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 جميع الحقوق محفوظة لنظام الامتحانات - كلية الرافدين الجامعة</p>
+    </div>
+  </footer>
+  
+  <!-- تضمين Font Awesome للأيقونات -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>

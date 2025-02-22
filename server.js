@@ -18,6 +18,18 @@ app.use(express.json());
 app.use(methodOverride('_method'));
 
 
+app.get('/', async(req,res)=>{
+  res.render('home-page');
+});
+
+
+app.get('/about-us', async(req,res)=>{
+  res.render('about-us');
+});
+
+
+
+
 app.get('/login',async(req,res)=>{
 
 res.render('Login');
@@ -25,7 +37,7 @@ res.render('Login');
 
 });
 
-app.get('/register', async(req,res)=>{
+app.get('/register-teacher', async(req,res)=>{
 
   res.render('Register')
 
@@ -48,20 +60,30 @@ app.get('/teacher-page', async(req,res)=>{
 });
 
 
-
-
-// all exams endpoint
-app.get('/exams',verifyToken , async(req,res)=>{    
-  
-  try{
+app.get('/dashboard', async(req,res)=>{
     
-  const exam = await Exam.findAll();
-  return res.status(200).json(exam)
-  }catch{
-    res.status(400).send({message:"There`s No Active Exam..."})
-  }
+
+
+
+  res.render('dashboard');
 
 });
+
+
+
+app.get('/exams', verifyToken, async (req, res) => {
+  try {
+    const exams = await Exam.findAll();
+
+    // تأكد من تمرير message حتى لو لم يكن هناك امتحانات
+    res.render('all-exams', { exams, message: exams.length > 0 ? null : "لا توجد امتحانات متاحة." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('all-exams', { exams: [], message: "حدث خطأ أثناء جلب الامتحانات." });
+  }
+});
+
+
 
 
 // active exams endpoint
@@ -95,27 +117,28 @@ app.get('/active-exams', verifyToken, async (req, res) => {
 });
 
 
-app.get('/teachers/:id/edit', verifyToken, async (req, res) => {
-  try {
-    const userid = req.params.id;
 
-    // البحث عن المستخدم
-    const user = await User.findOne({ where: { userid: userid } });
-    if (!user) {
-      return res.status(404).send('User not found');
+app.get('/not-active-exams', verifyToken, checkUserRole('admin'), async (req, res) => {
+  try {
+    const inactiveExams = await Exam.findAll({ where: { examstate: 'not active' } });
+
+    if (inactiveExams.length === 0) {
+      return res.render('not-active-exams', { exams: [], message: 'لا توجد امتحانات غير نشطة' });
     }
 
-    // جلب المواد والأقسام
-    const subjects = await Subject.findAll();
-    const departments = await Department.findAll();
+    res.render('not-active-exams', { exams: inactiveExams, message: null });
 
-    // عرض صفحة التعديل
-    res.render('EditUser', { user, subjects, departments });
   } catch (error) {
-    console.error(error);
-    res.status(500).send('An error occurred while loading the edit page.');
+    console.error('Error fetching inactive exams:', error);
+    res.status(500).send('حدث خطأ أثناء جلب الامتحانات.');
   }
 });
+
+
+
+
+
+
 
 
 app.get('/exams/:id', verifyToken, async (req, res) => {
@@ -160,10 +183,13 @@ app.get('/exams/:id', verifyToken, async (req, res) => {
 
 
 
-app.get('/results',verifyToken, async (req, res) => {
+app.get('/results', verifyToken, async (req, res) => {
   try {
-    // جلب جميع النتائج مع تفاصيل الامتحان والطالب
+    const userid = req.user.userid; // استخراج userid من التوكن
+
+    // جلب النتائج الخاصة بالمستخدم الحالي مع تفاصيل الامتحان
     const results = await Result.findAll({
+      where: { userid }, // تصفية النتائج بناءً على userid
       include: [
         { model: User, attributes: ['user_name', 'email'] }, // جلب بيانات المستخدم
         { model: Exam, attributes: ['examname'] } // جلب بيانات الامتحان
@@ -368,42 +394,57 @@ app.post('/exams', verifyToken, async (req, res) => {
 });
 
 
-
-
-
-
-
-
-// update exam endpoint
-app.put('/exams/:id',verifyToken, checkUserRole('teacher'), async (req, res) => {
+app.get('/exam/:id', verifyToken, async (req, res) => {
   try {
-
     const examid = req.params.id;
-    
-    // البحث عن الامتحان
-    const exam = await Exam.findOne({ where: { examid: examid } });
-    
+    const exam = await Exam.findByPk(examid);
+
+    if (!exam) {
+      return res.status(404).render('error', { message: 'Exam not found' });
+    }
+
+    res.render('edit-exams', { exam });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('error', { message: 'An error occurred while fetching the exam.' });
+  }
+});
+
+
+
+
+
+
+
+app.put('/exams/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
+  try {
+    const examid = req.params.id;
+
+    // التحقق مما إذا كان الامتحان موجودًا
+    const exam = await Exam.findByPk(examid);
     if (!exam) {
       return res.status(404).json({ error: 'Exam not found' });
     }
 
-    // تحديث بيانات الامتحان
+    // استخراج البيانات المرسلة
     const { examname, examtime, examstate } = req.body;
 
-    await Exam.update(
-      { examname, examtime, examstate },
-      { where: { examid: examid } }
-    );
+    if (!examname?.trim() || !examtime?.trim() || !examstate) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
 
-    // إرجاع النتيجة
-    const updatedExam = await Exam.findOne({ where: { examid: examid } });
-    res.json(updatedExam);
+    // تحديث الامتحان
+    await exam.update({ examname, examtime, examstate });
+
+    res.json({ success: true, message: 'Exam updated successfully', exam });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'An error occurred while updating the exam.' });
+    console.error('Error updating exam:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 
 
@@ -437,47 +478,72 @@ app.delete('/exams/:id',verifyToken, checkUserRole('admin'), async (req, res) =>
 
 
 // all users endpoint
-app.get('/users',verifyToken, checkUserRole('admin'),async(req,res)=>{
-  try{
-
-  const users = await User.findAll();
-  return res.status(200).json(users)
-  }catch(error){
-    res.status(400).send({error:"Error"})
+app.get('/users', verifyToken, checkUserRole('admin'), async (req, res) => {
+  try {
+    const users = await User.findAll();
+    // استدعاء صفحة EJS وتمرير بيانات المستخدمين إليها
+    res.render('users', { users });
+  } catch (error) {
+    res.status(400).send({ error: "Error" });
   }
-
 });
+
 
 
 // find one user endpoint
-app.get('/users/:id',verifyToken, checkUserRole('admin'),async(req,res)=>{
-  try{
+app.get('/users/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
+  try {
+    const userid = req.params.id;
 
-  const userid = req.params.id;
-  const users = await User.findOne({where: {userid:userid}});
-  return res.status(200).json(users)
-  }catch(error){
-    res.status(400).send({error: "There`s No User With This Id"})
+    // البحث عن المستخدم
+    const user = await User.findOne({ where: { userid: userid } });
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    // جلب المواد والأقسام
+    const subjects = await Subject.findAll();
+    const departments = await Department.findAll();
+
+    // عرض صفحة التعديل
+    res.render('EditUser', { user, subjects, departments });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while loading the edit page.');
   }
-
 });
+
 
 
 
 // show not active users endpoint
-app.get('/not-active-users',verifyToken, checkUserRole('admin'),async(req,res)=>{
-
-  try{
-
-      const not_active_users = await User.findAll({ where: { userstats: 'not active' } });
-      return res.status(200).json(not_active_users);
-
-  }catch(error){
-    res.status(500).send({error: "error"})
+app.get('/not-active-users', verifyToken, checkUserRole('admin'), async (req, res) => {
+  try {
+    const not_active_users = await User.findAll({ where: { userstats: 'not active' } });
+    // عرض صفحة EJS وتمرير البيانات إليها
+    res.render('not-active-users', { users: not_active_users });
+  } catch (error) {
+    res.status(500).send({ error: "حدث خطأ أثناء جلب البيانات" });
   }
-
-
 });
+
+
+
+// تحديث حالة المستخدم إلى "active"
+app.post('/activate-user/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
+  try {
+    const userid = req.params.id;
+
+    // تحديث حالة المستخدم
+    await User.update({ userstats: 'active' }, { where: { userid } });
+
+    // إعادة توجيه المستخدم إلى صفحة المستخدمين غير النشطين بعد التحديث
+    res.redirect('/not-active-users');
+  } catch (error) {
+    res.status(500).send({ error: "حدث خطأ أثناء تحديث الحالة" });
+  }
+});
+
 
 
 
@@ -533,96 +599,146 @@ app.put('/users/:id',verifyToken, async (req, res) => {
 
 
 
-// delete user endpoint
-app.delete('/users/:id',verifyToken, checkUserRole('admin'), async (req, res) => {
+// حذف المستخدم
+app.post('/delete-user/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
   try {
-
-
     const userid = req.params.id;
 
     // البحث عن المستخدم
     const user = await User.findOne({ where: { userid: userid } });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
     }
 
     // حذف المستخدم
     await User.destroy({ where: { userid: userid } });
 
-    // إرجاع النتيجة
-    res.json({ message: 'User deleted successfully' });
+    // إعادة التوجيه إلى صفحة المستخدمين بعد الحذف
+    res.redirect('/users');
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while deleting the user.' });
+    res.status(500).json({ error: 'حدث خطأ أثناء حذف المستخدم.' });
   }
 });
 
 
 
 // teacher register endpoint
-app.post('/teacher-register', async(req, res) => {
-    const { user_name, email, password, subname, deptname } = req.body;
-    const user_department = await Department.findOne({ where: { deptname } });
-    const user_subject = await Subject.findOne({ where: { subname } });
+app.post('/teacher-register', async (req, res) => {
+  const { user_name, email, password, subname, deptname } = req.body;
 
-    if (!user_name || !email || !password || !subname || !deptname) {
-        return res.status(400).json({ message: 'All fields are required' });
-    }
+  // 1. التحقق من وجود جميع الحقول المطلوبة
+  if (!user_name || !email || !password || !subname || !deptname) {
+      return res.status(400).json({ message: 'جميع الحقول مطلوبة' });
+  }
 
-    try {
-        // Check if the email already exists in the database
-        const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email already exists' });
-        }
+  try {
+      // 2. البحث عن القسم والمادة والتأكد من وجودهما
+      const [user_department, user_subject] = await Promise.all([
+          Department.findOne({ where: { deptname } }),
+          Subject.findOne({ where: { subname } })
+      ]);
 
-        const saltRounds = 10; 
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        
-        const user = await User.create({ user_name, email, password: hashedPassword, usertype : 'teacher', subid: user_subject.subid, deptid: user_department.deptid });
-            
-        res.redirect('/teacher-page');
+      if (!user_department) {
+          return res.status(404).json({ message: 'القسم غير موجود' });
+      }
+      if (!user_subject) {
+          return res.status(404).json({ message: 'المادة غير موجودة' });
+      }
 
-    } catch (error) {
-        console.error('Error registering user:', error);
-        return res.status(500).json({ message: 'An error occurred while registering user' });
-    }
+      // 3. التحقق من عدم تكرار البريد الإلكتروني
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+          return res.status(409).json({ message: 'البريد الإلكتروني مسجل مسبقًا' });
+      }
+
+      // 4. تشفير كلمة المرور
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // 5. إنشاء المستخدم الجديد
+      await User.create({
+          user_name,
+          email,
+          password: hashedPassword,
+          usertype: 'teacher',
+          subid: user_subject.subid,
+          deptid: user_department.deptid
+      });
+
+      // 6. إعادة توجيه بعد التسجيل الناجح
+      res.redirect('/login');
+
+  } catch (error) {
+      // 7. معالجة الأخطاء التفصيلية
+      console.error('خطأ في تسجيل المدرس:', error);
+      
+      // تحديد نوع الخطأ لإرسال رسالة مناسبة
+      const errorMessage = error.name === 'SequelizeUniqueConstraintError' 
+          ? 'البريد الإلكتروني مسجل مسبقًا' 
+          : 'حدث خطأ أثناء التسجيل';
+
+      res.status(500).json({ 
+          message: errorMessage,
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+  }
 });
 
 
 // student register endpoint
-app.post('/student-register', async(req, res) => {
-    const { user_name, email, password, deptname } = req.body;
+app.post('/student-register', async (req, res) => {
+  const { user_name, email, password, deptname } = req.body;
 
-    const user_department = await Department.findOne({ where: { deptname } });
+  // 1. التحقق من وجود جميع الحقول المطلوبة
+  if (!user_name || !email || !password || !deptname) {
+      return res.status(400).json({ message: 'جميع الحقول مطلوبة' });
+  }
 
-    if (!user_name || !email || !password || !deptname) {
-        return res.status(400).json({ message: 'All fields are required' });
-    }
+  try {
+      // 2. البحث عن القسم والتأكد من وجوده
+      const user_department = await Department.findOne({ where: { deptname } });
+      if (!user_department) {
+          return res.status(404).json({ message: 'القسم غير موجود' });
+      }
 
-    try {
-        // Check if the email already exists in the database
-        const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email already exists' });
-        }
+      // 3. التحقق من عدم تكرار البريد الإلكتروني
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+          return res.status(409).json({ message: 'البريد الإلكتروني مسجل مسبقًا' });
+      }
 
-        // Hash the password before saving it to the database
-        const saltRounds = 10; // Ensure saltRounds is a valid number
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        
-        const user = await User.create({ user_name, email, password: hashedPassword, usertype : 'student', deptid: user_department.deptid });
-            
-        res.redirect('/active-exams');
+      // 4. تشفير كلمة المرور
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-    } catch (error) {
-        console.error('Error registering user:', error);
-        return res.status(500).json({ message: 'An error occurred while registering user' });
-    }
+      // 5. إنشاء المستخدم الجديد
+      await User.create({
+          user_name,
+          email,
+          password: hashedPassword,
+          usertype: 'student',
+          deptid: user_department.deptid
+      });
+
+      // 6. إعادة توجيه بعد التسجيل الناجح
+      res.redirect('/login');
+
+  } catch (error) {
+      // 7. معالجة الأخطاء التفصيلية
+      console.error('خطأ في تسجيل الطالب:', error);
+      
+      // تحديد نوع الخطأ لإرسال رسالة مناسبة
+      const errorMessage = error.name === 'SequelizeUniqueConstraintError' 
+          ? 'البريد الإلكتروني مسجل مسبقًا' 
+          : 'حدث خطأ أثناء التسجيل';
+
+      res.status(500).json({ 
+          message: errorMessage,
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+  }
 });
-
 
 
 // login endpoint
@@ -630,73 +746,76 @@ app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-      // البحث عن المستخدم باستخدام البريد الإلكتروني
-      const user = await User.findOne({ where: { email } });
-      if (!user) {
-          return res.status(401).json({ message: 'Invalid email or password' });
-      }
+    // البحث عن المستخدم باستخدام البريد الإلكتروني
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
 
-      // التحقق من كلمة المرور
-      const validPassword = await bcrypt.compare(password, user.password);
-      if (!validPassword) {
-          return res.status(401).json({ message: 'Invalid email or password' });
-      }
+    // التحقق من كلمة المرور
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
 
-      // إنشاء التوكن
-      const token = jwt.sign(
-          { 
-              userid: user.userid,
-              user_name: user.user_name,
-              email:user.email,
-              usertype: user.usertype,
-              subid: user.subid 
-          },
-          'baqerali313', // هذا هو السر (secret)
-          { expiresIn: '1h' } // التوكن سينتهي بعد ساعة
-      );
+    // إنشاء التوكن
+    const token = jwt.sign(
+      {
+        userid: user.userid,
+        user_name: user.user_name,
+        email: user.email,
+        usertype: user.usertype,
+        subid: user.subid
+      },
+      'baqerali313', // هذا هو السر (secret)
+      { expiresIn: '24h' } // التوكن سينتهي بعد 24 ساعة
+    );
 
-      // إعدادات الكوكيز مع الأمان
-      res.cookie('token', token, {
-          httpOnly: true, // هذا يعني أن الكوكيز غير قابل للوصول عبر جافا سكربت
-          maxAge: 3600000, // مدة صلاحية الكوكيز (1 ساعة)
-          sameSite: 'Strict', // يمكن تحديد sameSite لضمان أمان الكوكيز
-      });
+    // إعدادات الكوكيز مع الأمان
+    res.cookie('token', token, {
+      httpOnly: true, // هذا يعني أن الكوكيز غير قابل للوصول عبر جافا سكربت
+      maxAge: 86400000, // مدة صلاحية الكوكيز (24 ساعة)
+      sameSite: 'Strict', // يمكن تحديد sameSite لضمان أمان الكوكيز
+      secure: process.env.NODE_ENV === 'production', // تفعيل secure في البيئة الإنتاجية فقط
+    });
 
-      
-       // توجيه المستخدم بناءً على نوعه
-       if (user.usertype === 'admin') {
-        res.redirect('/admin');
+    // توجيه المستخدم بناءً على نوعه
+    if (user.usertype === 'admin') {
+      res.redirect('/dashboard');
     } else if (user.usertype === 'teacher') {
-        res.redirect('/teacher-page');
+      res.redirect('/teacher-page');
     } else if (user.usertype === 'student') {
-        res.redirect('/active-exams');
+      res.redirect('/active-exams');
     }
   } catch (error) {
-      console.error('Error logging in:', error);
-      return res.status(500).json({ message: 'An error occurred while logging in', error });
+    console.error('Error logging in:', error);
+    return res.status(500).json({ message: 'An error occurred while logging in', error });
   }
 });
 
 
 
-// all departments endpoint
-app.get('/departments',verifyToken, checkUserRole('admin'), async (req, res) => {
+// عرض جميع الأقسام في صفحة EJS
+app.get('/departments', verifyToken, checkUserRole('admin'), async (req, res) => {
   try {
-
     const departments = await Department.findAll();
-    res.json(departments);
+
+    if (departments.length === 0) {
+      return res.render('departments', { departments: [], message: 'لا توجد أقسام متاحة' });
+    }
+
+    res.render('departments', { departments, message: null });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while fetching departments.' });
+    res.status(500).send('حدث خطأ أثناء جلب الأقسام.');
   }
 });
+
 
 
 // find one department endpoint
-app.get('/departments/:id',verifyToken, checkUserRole('admin'), async (req, res) => {
+app.get('/departments/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
   try {
-
-
     const deptid = req.params.id;
     const department = await Department.findOne({ where: { deptid: deptid } });
 
@@ -704,7 +823,7 @@ app.get('/departments/:id',verifyToken, checkUserRole('admin'), async (req, res)
       return res.status(404).json({ error: 'Department not found' });
     }
 
-    res.json(department);
+    res.render('update-department', { department, message: '' }); // تم إضافة message هنا
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while fetching the department.' });
@@ -722,7 +841,7 @@ if (!deptname || !deptstages) {
 }
   
 const department = await Department.create({ deptname, deptstages });
-return res.status(200).json({message : ' Department Added Succesfully'})
+return res.redirect('/departments');
 }catch(error){
     console.log(error)
 }
@@ -730,9 +849,8 @@ return res.status(200).json({message : ' Department Added Succesfully'})
 
 
 // update department endpoint
-app.put('/departments/:id', verifyToken, checkUserRole('admin'),async (req, res) => {
+app.put('/departments/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
   try {
-
     const deptid = req.params.id;
 
     // البحث عن القسم
@@ -780,8 +898,7 @@ app.delete('/departments/:id',verifyToken, checkUserRole('admin'), async (req, r
     await Department.destroy({ where: { deptid: deptid } });
 
     // إرجاع النتيجة
-    res.status(200).send({ message: "Delete Department Done" });
-
+    res.redirect('/departments');
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: "An error happened while deleting the department" });
@@ -790,17 +907,22 @@ app.delete('/departments/:id',verifyToken, checkUserRole('admin'), async (req, r
 
 
 
-// all subjects endpoint
-app.get('/subjects',verifyToken, checkUserRole('admin'), async (req, res) => {
+// عرض جميع المواد الدراسية في صفحة EJS
+app.get('/subjects', verifyToken, checkUserRole('admin'), async (req, res) => {
   try {
-
     const subjects = await Subject.findAll();
-    res.json(subjects);
+
+    if (subjects.length === 0) {
+      return res.render('subjects', { subjects: [], message: 'لا توجد مواد دراسية متاحة' });
+    }
+
+    res.render('subjects', { subjects, message: null });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while fetching subjects.' });
+    res.status(500).send('حدث خطأ أثناء جلب المواد الدراسية.');
   }
 });
+
 
 
 // find one subject endpoint
@@ -815,7 +937,7 @@ app.get('/subjects/:id',verifyToken, checkUserRole('admin'), async (req, res) =>
       return res.status(404).json({ error: 'Subject not found' });
     }
 
-    res.json(subject);
+    res.render('update-subjects', { subject}); 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while fetching the subject.' });
@@ -836,7 +958,7 @@ if (!subname || !substage || !subtype || !deptname) {
 }
     const user_department = await Department.findOne({ where: { deptname } });
     const subject = await Subject.create({ subname, substage, subtype, deptid: user_department.deptid});
-    return res.status(200).json({message : "Subject Added Succesfully"});
+    return res.redirect('/subjects');
 } catch (error) {
     console.log(error);
 }
@@ -848,7 +970,6 @@ if (!subname || !substage || !subtype || !deptname) {
 app.put('/subjects/:id',verifyToken, checkUserRole('admin'), async (req, res) => {
 
   try {
-
     const subid = req.params.id;
 
     // البحث عن المادة
@@ -862,19 +983,18 @@ app.put('/subjects/:id',verifyToken, checkUserRole('admin'), async (req, res) =>
     const { subname, substage, subtype, deptid } = req.body;
 
     await Subject.update(
-      { subname, substage, subtype, deptid },
+      { subname, substage, deptid },
       { where: { subid: subid } }
     );
 
-    // إرجاع النتيجة
-    const updatedSubject = await Subject.findOne({ where: { subid: subid } });
-    res.json(updatedSubject);
+   res.redirect('/subjects');
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while updating the subject.' });
   }
 });
+
 
 
 
@@ -897,8 +1017,7 @@ app.delete('/subjects/:id',verifyToken, checkUserRole('admin'), async (req, res)
     await Subject.destroy({ where: { subid: subid } });
 
     // إرجاع النتيجة
-    res.status(200).send({ message: "Delete Subject Done" });
-
+    res.redirect('/subjects');  
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: "An error happened while deleting the subject" });
@@ -907,76 +1026,101 @@ app.delete('/subjects/:id',verifyToken, checkUserRole('admin'), async (req, res)
 
 
 
-// all questions endpoint
-app.get('/questions',verifyToken, checkUserRole('admin'), async (req, res) => {
-
+// عرض جميع الأسئلة في صفحة EJS
+app.get('/questions', verifyToken, checkUserRole('admin'), async (req, res) => {
   try {
-
-
     const questions = await Question.findAll({
-      include: Option // تضمين الخيارات المتعلقة بكل سؤال
+      include: Option, // تضمين الخيارات لكل سؤال
     });
-    res.json(questions);
+
+    if (questions.length === 0) {
+      return res.render('questions', { questions: [], message: 'لا توجد أسئلة متاحة' });
+    }
+
+    res.render('questions', { questions, message: null });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while fetching questions.' });
+    res.status(500).send('حدث خطأ أثناء جلب الأسئلة.');
   }
 });
 
 
 
-// find one question endpoint
-app.get('/questions/:id', verifyToken, checkUserRole('admin'),async (req, res) => {
 
+app.get('/questions/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
   try {
-
     const qid = req.params.id;
     const question = await Question.findOne({
       where: { qid: qid },
-      include: Option // تضمين الخيارات المتعلقة بالسؤال المحدد
+      include: { model: Option }, // تضمين الخيارات المرتبطة بالسؤال
     });
 
     if (!question) {
-      return res.status(404).json({ error: 'Question not found' });
+      return res.render('question-details', { question: null, message: 'السؤال غير موجود' });
     }
 
-    res.json(question);
+    res.render('question-details', { question, message: null });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while fetching the question.' });
+    res.status(500).send('حدث خطأ أثناء جلب السؤال.');
   }
 });
 
 
 
-// update question endpoint
-app.put('/questions/:id', verifyToken, checkUserRole('admin'),async (req, res) => {
 
+
+app.put('/questions/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
   try {
-
-
     const qid = req.params.id;
-    const { qtext, qtype } = req.body;
+    const { text, options, correctOptionIds } = req.body;
 
-    // البحث عن السؤال
-    const question = await Question.findOne({ where: { qid: qid } });
+    console.log("Received data:", { text, options, correctOptionIds });
 
-    if (!question) {
-      return res.status(404).json({ error: 'Question not found' });
-    }
-
-    // تحديث بيانات السؤال
+    // تحديث نص السؤال
     await Question.update(
-      { qtext: qtext, qtype: qtype },
+      { qtext: text },
       { where: { qid: qid } }
     );
 
+    // تحديث الخيارات
+    for (let i = 0; i < options.length; i++) {
+      const optionText = options[i];
+      const correctOption = correctOptionIds.find(c => Number(c.oidx) === i); // تحويل oidx إلى رقم عند البحث
+
+      if (correctOption) { 
+        if (correctOption.oid) { 
+          await Option.update(
+            { 
+              optext: optionText, // تحديث نص الخيار
+              iscorrect: correctOption.iscorrect // تحديث حالة الخيار الصحيح
+            },
+            { 
+              where: { 
+                qid: qid, // ربط الخيار بالسؤال
+                opid: correctOption.oid // استخدام opid لتحديد الخيار الصحيح
+              } 
+            }
+          );
+        } else {
+          console.error(`Missing 'oid' for correctOption at index ${i}:`, correctOption);
+        }
+      } else {
+        console.warn(`No matching correctOption found for index ${i}`);
+      }
+    }
+
     res.status(200).json({ message: 'Question updated successfully.' });
   } catch (error) {
-    console.error(error);
+    console.error("Error details:", error);
     res.status(500).json({ error: 'An error occurred while updating the question.' });
   }
 });
+
+
+
+
+
 
 
 // delete question endpoint
@@ -1035,34 +1179,34 @@ app.get('/options/:id', verifyToken, checkUserRole('admin'),async (req, res) => 
 });
 
 
-// update option endpoint
-app.put('/options/:id', verifyToken, checkUserRole('admin'),async (req, res) => {
+// // update option endpoint
+// app.put('/options/:id', verifyToken, checkUserRole('admin'),async (req, res) => {
  
-  try {
+//   try {
 
     
-    const opid = req.params.id;
-    const { optext, iscorrect } = req.body;
+//     const opid = req.params.id;
+//     const { optext, iscorrect } = req.body;
 
-    // البحث عن الخيار
-    const option = await Option.findOne({ where: { opid: opid } });
+//     // البحث عن الخيار
+//     const option = await Option.findOne({ where: { opid: opid } });
 
-    if (!option) {
-      return res.status(404).json({ error: 'Option not found' });
-    }
+//     if (!option) {
+//       return res.status(404).json({ error: 'Option not found' });
+//     }
 
-    // تحديث بيانات الخيار
-    await Option.update(
-      { optext: optext, iscorrect: iscorrect },
-      { where: { opid: opid } }
-    );
+//     // تحديث بيانات الخيار
+//     await Option.update(
+//       { optext: optext, iscorrect: iscorrect },
+//       { where: { opid: opid } }
+//     );
 
-    res.status(200).json({ message: 'Option updated successfully.' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'An error occurred while updating the option.' });
-  }
-});
+//     res.status(200).json({ message: 'Option updated successfully.' });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'An error occurred while updating the option.' });
+//   }
+// });
 
 
 
