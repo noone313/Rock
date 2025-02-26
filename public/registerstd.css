@@ -133,7 +133,53 @@ button[type="submit"] {
 button[type="submit"]:hover {
     background-color: #0056b3;
 }
+/* تحسين مظهر القوائم المنسدلة */
+select {
+    width: 100%;
+    padding: 0.875rem 2.5rem 0.875rem 1rem; /* إضافة padding لخلق مسافة */
+    border: 2px solid #E2E8F0;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    background-color: white;
+    appearance: none; /* إزالة السهم الافتراضي */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
 
+select:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* إضافة سهم مخصص */
+.form-group select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+}
+
+/* تحسين مظهر الأيقونات */
+.form-group label {
+    position: absolute;
+    left: 1rem; /* تعديل المسافة بين الأيقونة والنص */
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; /* تجنب التداخل مع النقر */
+    color: #6B7280; /* لون الأيقونة */
+}
+
+/* إضافة مسافة إضافية عند وجود أيقونة */
+.form-group {
+    position: relative;
+}
+
+.form-group input,
+.form-group select {
+    padding-left: 2.5rem; /* إضافة مسافة لليسار لإفساح المجال للأيقونة */
+}
 /* Media Queries للتصميم المتجاوب */
 
 

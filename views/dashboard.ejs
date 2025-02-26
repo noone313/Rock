@@ -201,6 +201,14 @@
       margin-bottom: 1.5rem;
     }
 
+    /* أنماط خاصة بالأزرار في بطاقة المستخدمين */
+    .card-actions {
+      display: flex;
+      gap: 1rem; /* المسافة بين الأزرار */
+      justify-content: center; /* توسيط الأزرار */
+      margin-top: 1.5rem; /* المسافة من الأعلى */
+    }
+
     .card-action {
       display: inline-flex;
       align-items: center;
@@ -213,6 +221,8 @@
       transition: all 0.25s;
       font-weight: 500;
       border: 2px solid transparent;
+      flex: 1; /* لجعل الأزرار تأخذ مساحة متساوية */
+      text-align: center; /* توسيط النص داخل الأزرار */
     }
 
     .card-action:hover {
@@ -273,7 +283,7 @@
           </li>
           <li class="nav-item">
             <a href="/not-active-exams" class="nav-link">
-              <span>👥</span> إدارة الامتحانات الغير نشطة
+              <span>📝</span> إدارة الامتحانات الغير نشطة
             </a>
           </li>
           <li class="nav-item">
@@ -307,8 +317,8 @@
         <div class="card">
           <div class="card-icon">🏛️</div>
           <h3 class="card-title">الأقسام الجامعية</h3>
-          <p class="card-description">إضافة التخصصات الجديد </p>
-          <a href="/departments" class="card-action">
+          <p class="card-description">إضافة التخصصات الجديدة</p>
+          <a href="/add-departments" class="card-action">
             اضافة →
           </a>
         </div>
@@ -318,7 +328,7 @@
           <div class="card-icon">📚</div>
           <h3 class="card-title">المواد الدراسية</h3>
           <p class="card-description">اضافة مواد دراسية جديدة</p>
-          <a href="/subjects" class="card-action">
+          <a href="/add-subjects" class="card-action">
             اضافة →
           </a>
         </div>
@@ -328,9 +338,14 @@
           <div class="card-icon">👥</div>
           <h3 class="card-title">المستخدمون</h3>
           <p class="card-description">اضافة مستخدمين جدد</p>
-          <a href="/users" class="card-action">
-            اضافة → 
-          </a>
+          <div class="card-actions">
+            <a href="/register-teacher" class="card-action">
+              اضافة معلم →
+            </a>
+            <a href="/register-student" class="card-action">
+              اضافة طالب →
+            </a>
+          </div>
         </div>
       </div>
     </div>

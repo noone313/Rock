@@ -41,13 +41,19 @@
                         <input type="password" name="password" placeholder="Enter your Password" required>
                         <label><i class="fa-solid fa-lock"></i></label>
                     </div>
+
+                    <!-- قسم القائمة المنسدلة للقسم -->
                     <div class="form-group">
-                        <input type="text" name="deptname" placeholder="Enter your Department" required>
-                        <label for="Department"><i class="fa-solid fa-building-user"></i></label>
+                        <select name="deptname" id="deptname" required>
+                            <option value="">Select your Department</option>
+                            <% departments.forEach(department => { %>
+                                <option value="<%= department.deptid %>"><%= department.deptname %></option>
+                            <% }); %>
+                        </select>
+                        <label for="deptname"><i class="fa-solid fa-building-user"></i></label>
                     </div>
                    
                     <button type="submit">Register</button>
-                    
                 </form>
             </div>
         </div>

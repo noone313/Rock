@@ -100,31 +100,37 @@
 
   <script>
     async function deleteDepartment(deptId) {
-      const confirmDelete = confirm("هل أنت متأكد من حذف هذا القسم؟");
-      if (!confirmDelete) return;
+        const confirmDelete = confirm("هل أنت متأكد من حذف هذا القسم؟");
+        if (!confirmDelete) return;
 
-      try {
-        const response = await fetch(`/departments/${deptId}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json"
-          }
-        });
+        try {
+            const response = await fetch(`/departments/${deptId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
 
-        const result = await response.json();
-
-        if (response.ok) {
-          alert(result.message);
-          document.getElementById(`row-${deptId}`).remove(); // إزالة الصف من الجدول
-        } else {
-          alert(result.error || "فشل الحذف. الرجاء المحاولة مرة أخرى.");
+            if (response.ok) {
+                
+                // عرض رسالة نجاح
+                alert('تم الحذف بنجاح');
+                
+                // إعادة تحميل الصفحة بعد ثانية واحدة
+                setTimeout(() => {
+                    window.location.reload();
+                }, 100);
+            } else {
+                const errorData = await response.json();
+                alert(`خطأ في الحذف: ${errorData.message}`);
+            }
+        } catch (error) {
+          console.log('Error:', error);
+            console.error('Error:', error);
+            alert('حدث خطأ غير متوقع أثناء الحذف');
         }
-      } catch (error) {
-        console.error("Error deleting department:", error);
-        alert("حدث خطأ أثناء الحذف.");
-      }
     }
-  </script>
+</script>
 
 </body>
 </html>

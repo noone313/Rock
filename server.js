@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser');
 const {User, Department, Subject, Question, Option, Exam,Answer,Result} = require('./models/tables');
 const { verifyToken, checkUserRole } = require('./middleware/authmiddleware');
 const methodOverride = require('method-override');
+const session = require('express-session');
+
 
 
 const app = express();
@@ -16,6 +18,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(methodOverride('_method'));
+app.use(session({
+  secret: 'baqerali313',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+      
+      maxAge: 24 * 60 * 60 * 1000 // 24 ساعة
+  }
+}));
+
 
 
 app.get('/', async(req,res)=>{
@@ -28,7 +40,9 @@ app.get('/about-us', async(req,res)=>{
 });
 
 
-
+app.get('/add-departments', async(req,res)=>{
+  res.render('add-departments');
+});
 
 app.get('/login',async(req,res)=>{
 
@@ -38,16 +52,20 @@ res.render('Login');
 });
 
 app.get('/register-teacher', async(req,res)=>{
-
-  res.render('Register')
+// جلب جميع الأقسام من قاعدة البيانات
+const departments = await Department.findAll();
+const subjects = await Subject.findAll();
+  res.render('Register', { departments, subjects });
 
 
 });
 
 
 app.get('/register-student', async(req,res)=>{
+// جلب جميع الأقسام من قاعدة البيانات
+const departments = await Department.findAll();
 
-  res.render('registerstd')
+  res.render('registerstd', { departments });
 
 
 });
@@ -58,6 +76,22 @@ app.get('/teacher-page', async(req,res)=>{
    res.render('TeacherPage');
 
 });
+
+
+
+app.get('/add-subjects', async (req, res) => {
+  try {
+      // جلب جميع الأقسام من قاعدة البيانات
+      const departments = await Department.findAll();
+      
+      // عرض صفحة إضافة مادة مع تمرير بيانات الأقسام
+      res.render('add-subjects', { departments });
+  } catch (error) {
+      console.error("حدث خطأ أثناء جلب الأقسام:", error);
+      res.status(500).send("حدث خطأ أثناء جلب الأقسام");
+  }
+});
+
 
 
 app.get('/dashboard', async(req,res)=>{
@@ -776,7 +810,7 @@ app.post('/login', async (req, res) => {
       httpOnly: true, // هذا يعني أن الكوكيز غير قابل للوصول عبر جافا سكربت
       maxAge: 86400000, // مدة صلاحية الكوكيز (24 ساعة)
       sameSite: 'Strict', // يمكن تحديد sameSite لضمان أمان الكوكيز
-      secure: process.env.NODE_ENV === 'production', // تفعيل secure في البيئة الإنتاجية فقط
+      
     });
 
     // توجيه المستخدم بناءً على نوعه
@@ -790,6 +824,30 @@ app.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Error logging in:', error);
     return res.status(500).json({ message: 'An error occurred while logging in', error });
+  }
+});
+
+
+
+// تسجيل الخروج
+app.get('/logout', (req, res) => {
+  try {
+      // تدمير الجلسة
+      req.session.destroy((err) => {
+          if (err) {
+              console.error('Error destroying session:', err);
+              return res.status(500).send('خطأ في تسجيل الخروج');
+          }
+          
+          // مسح كوكي الجلسة
+          res.clearCookie('token'); // أو اسم الكوكي الذي تستخدمه
+          
+          // إعادة توجيه إلى صفحة تسجيل الدخول
+          res.redirect('/login');
+      });
+  } catch (error) {
+      console.error('Error during logout:', error);
+      res.status(500).json({ message: 'حدث خطأ أثناء تسجيل الخروج' });
   }
 });
 
@@ -881,27 +939,22 @@ app.put('/departments/:id', verifyToken, checkUserRole('admin'), async (req, res
 
 
 // delete department endpoint 
-app.delete('/departments/:id',verifyToken, checkUserRole('admin'), async (req, res) => {
+app.delete('/departments/:id', async (req, res) => {
   try {
+      const { id } = req.params;
 
-  
-    const deptid = req.params.id;
+      const deletedDepartment = await Department.destroy({
+          where: { deptid: id }
+      });
 
-    // البحث عن القسم
-    const department = await Department.findOne({ where: { deptid: deptid } });
+      if (!deletedDepartment) {
+          return res.status(404).json({ message: "القسم غير موجود" });
+      }
 
-    if (!department) {
-      return res.status(404).json({ error: 'Department not found' });
-    }
-
-    // حذف القسم
-    await Department.destroy({ where: { deptid: deptid } });
-
-    // إرجاع النتيجة
-    res.redirect('/departments');
+      res.status(200).json({ message: "تم حذف القسم بنجاح" });
   } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: "An error happened while deleting the department" });
+      console.error("حدث خطأ أثناء الحذف:", error);
+      res.status(500).json({ message: "حدث خطأ أثناء حذف القسم" });
   }
 });
 
@@ -951,13 +1004,13 @@ app.post('/subjects', verifyToken, checkUserRole('admin'),async(req,res)=>{
 
 try {
 
-const { subname, substage, subtype, deptname} = req.body;
+const { subname, substage, deptid} = req.body;
 
-if (!subname || !substage || !subtype || !deptname) {
+if (!subname || !substage || !deptid) {
     return res.status(400).json({ message: 'All fields are required' });
 }
-    const user_department = await Department.findOne({ where: { deptname } });
-    const subject = await Subject.create({ subname, substage, subtype, deptid: user_department.deptid});
+    const user_department = await Department.findOne({ where: { deptid } });
+    const subject = await Subject.create({ subname, substage, deptid: user_department.deptid});
     return res.redirect('/subjects');
 } catch (error) {
     console.log(error);

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة قسم جديد - كلية الرافدين الجامعة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #93C5FD;
+            --surface: #FFFFFF;
+            --background: #F8FAFC;
+            --border-color: #E2E8F0;
+            --text-primary: #1E293B;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* الهيدر */
+        .header {
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            padding: 1rem 2rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            height: 70px;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* النموذج */
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+        }
+
+        .form-wrapper {
+            max-width: 720px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--surface);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .form-title {
+            text-align: center;
+            color: var(--primary-dark);
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* الفوتر */
+        .footer {
+            background: var(--surface);
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .form-wrapper {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="/">
+                <img src="/image/rock-logo.png" alt="شعار الكلية" class="logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="/dashboard">لوحة التحكم</a></li>
+                <li><a href="/departments">الأقسام</a></li>
+                <li><a href="/add-department">إضافة قسم</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="form-wrapper">
+            <h1 class="form-title">إضافة قسم جديد</h1>
+            
+            <form action="/departments" method="POST" class="needs-validation" novalidate>
+                <div class="form-group">
+                    <label for="deptname" class="form-label">اسم القسم</label>
+                    <input 
+                        type="text" 
+                        id="deptname" 
+                        name="deptname"
+                        class="form-input"
+                        placeholder="اسم القسم..."
+                        required
+                        minlength="3"
+                        maxlength="50"
+                    >
+                    <div class="invalid-feedback">يرجى إدخال اسم صحيح (3-50 حرفًا)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="deptstages" class="form-label">عدد المراحل</label>
+                    <input 
+                        type="number" 
+                        id="deptstages" 
+                        name="deptstages"
+                        class="form-input"
+                        min="1"
+                        max="6"
+                        placeholder="عدد المراحل..."
+                        required
+                    >
+                    <div class="invalid-feedback">يجب أن يكون العدد بين 1 و 6</div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save me-2"></i> حفظ البيانات
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 نظام إدارة الأقسام - كلية الرافدين الجامعة</p>
+        </div>
+    </footer>
+
+    <script>
+        (() => {
+            'use strict'
+            
+            const forms = document.querySelectorAll('.needs-validation')
+            
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+</body>
+</html>

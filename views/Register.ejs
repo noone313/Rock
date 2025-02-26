@@ -41,20 +41,30 @@
                         <input type="password" name="password" placeholder="Enter your Password" required>
                         <label><i class="fa-solid fa-lock"></i></label>
                     </div>
+
+                    <!-- قسم القائمة المنسدلة للقسم -->
                     <div class="form-group">
-                        <input type="text" name="subname" placeholder="Enter your Subject" required>
-                        <label for="Subject"><i class="fa-solid fa-book"></i></label>
+                        <select name="deptname" id="deptname" required>
+                            <option value="">Select your Department</option>
+                            <% departments.forEach(department => { %>
+                                <option value="<%= department.deptid %>"><%= department.deptname %></option>
+                            <% }); %>
+                        </select>
+                        <label for="deptname"><i class="fa-solid fa-building-user"></i></label>
                     </div>
+
+                    <!-- قسم القائمة المنسدلة للمادة -->
                     <div class="form-group">
-                        <input type="text" name="deptname" placeholder="Enter your Department" required>
-                        <label for="Department"><i class="fa-solid fa-building-user"></i></label>
+                        <select name="subject" id="subject" required>
+                            <option value="">Select your Subject</option>
+                            <% subjects.forEach(subject => { %>
+                                <option value="<%= subject.subid %>"><%= subject.subname %></option>
+                            <% }); %>
+                        </select>
+                        <label for="subject"><i class="fa-solid fa-book"></i></label>
                     </div>
-                    <div class="form-group">
-                        <input type="text" name="deptstages" placeholder="Enter your DepartmentStage" required>
-                        <label for="DepartmentStage"><i class="fa-solid fa-graduation-cap"></i></label>
-                    </div>
+                   
                     <button type="submit">Register</button>
-                    
                 </form>
             </div>
         </div>
