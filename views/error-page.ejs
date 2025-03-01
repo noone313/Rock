@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>حدث خطأ - نظام الامتحانات</title>
+  <style>
+    :root {
+      --primary: #3B82F6;
+      --primary-100: #EFF6FF;
+      --surface: #FFFFFF;
+      --text: #1E293B;
+      --danger: #DC3545;
+      --gradient: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    body {
+      background: var(--primary-100);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .error-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      width: 90%;
+      padding: 2rem;
+    }
+
+    .error-container {
+      background: var(--surface);
+      border-radius: 1.5rem;
+      padding: 3rem 2rem;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .error-decor {
+      position: absolute;
+      top: -50px;
+      right: -30px;
+      width: 150px;
+      height: 150px;
+      background: var(--gradient);
+      border-radius: 50%;
+      opacity: 0.1;
+    }
+
+    .error-icon {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .error-icon svg {
+      width: 120px;
+      height: 120px;
+      color: var(--danger);
+      filter: drop-shadow(0 8px 12px rgba(220,53,69,0.15));
+    }
+
+    .error-content {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .error-code {
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 4px 12px rgba(59,130,246,0.15);
+    }
+
+    .error-title {
+      font-size: 1.8rem;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .error-message {
+      color: #64748B;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      max-width: 500px;
+      margin: 0 auto 2rem;
+    }
+
+    .error-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .error-btn {
+      padding: 0.875rem 1.75rem;
+      border-radius: 0.75rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .error-btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59,130,246,0.25);
+    }
+
+    .error-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(59,130,246,0.3);
+    }
+
+    .error-btn-secondary {
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      background: transparent;
+    }
+
+    .error-btn-secondary:hover {
+      background: var(--primary-100);
+    }
+
+    .error-details {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #64748B;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    @media (max-width: 480px) {
+      .error-code { font-size: 3rem; }
+      .error-title { font-size: 1.5rem; }
+      .error-message { font-size: 1rem; }
+    }
+  </style>
+  <!-- تضمين خط Cairo -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- أيقونات SVG -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="warning-icon" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </symbol>
+    <symbol id="home-icon" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/>
+    </symbol>
+  </svg>
+</head>
+<body>
+  <div class="error-wrapper">
+    <div class="error-container">
+      <div class="error-decor"></div>
+      
+      <div class="error-icon">
+        <svg>
+          <use xlink:href="#warning-icon"></use>
+        </svg>
+      </div>
+
+      <div class="error-content">
+        <div class="error-code">500</div>
+        <h1 class="error-title">حدث خطأ غير متوقع</h1>
+        <p class="error-message"><%= message %></p>
+        
+        <div class="error-actions">
+          <a href="/" class="error-btn error-btn-primary">
+            <svg width="20" height="20">
+              <use xlink:href="#home-icon"></use>
+            </svg>
+            الصفحة الرئيسية
+          </a>
+          <button onclick="history.back()" class="error-btn error-btn-secondary">
+            العودة للخلف
+          </button>
+        </div>
+
+        <div class="error-details">
+          <p>رمز الخطأ: ERR_<%= errorCode || 'UNKNOWN' %></p>
+          <p>إذا استمرت المشكلة، يرجى التواصل مع الدعم الفني: support@example.com</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -88,7 +88,10 @@ app.get('/add-subjects', async (req, res) => {
       res.render('add-subjects', { departments });
   } catch (error) {
       console.error("حدث خطأ أثناء جلب الأقسام:", error);
-      res.status(500).send("حدث خطأ أثناء جلب الأقسام");
+      res.render('error-page', {
+        message: "حدث خطأ أثناء جلب الأقسام.",
+        errorCode: "INTERNAL_SERVER_ERROR"
+    });
   }
 });
 
@@ -109,7 +112,6 @@ app.get('/exams', verifyToken, async (req, res) => {
   try {
     const exams = await Exam.findAll();
 
-    // تأكد من تمرير message حتى لو لم يكن هناك امتحانات
     res.render('all-exams', { exams, message: exams.length > 0 ? null : "لا توجد امتحانات متاحة." });
   } catch (error) {
     console.error(error);
@@ -146,7 +148,10 @@ app.get('/active-exams', verifyToken, async (req, res) => {
     res.render('studentPage', { exams: examData , user_name, email});
   } catch (error) {
     console.error(error);
-    res.status(500).send({ message: "Error fetching active exams." });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب الامتحانات.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -164,7 +169,10 @@ app.get('/not-active-exams', verifyToken, checkUserRole('admin'), async (req, re
 
   } catch (error) {
     console.error('Error fetching inactive exams:', error);
-    res.status(500).send('حدث خطأ أثناء جلب الامتحانات.');
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب الامتحانات.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -183,7 +191,10 @@ app.get('/exams/:id', verifyToken, async (req, res) => {
     // جلب بيانات الامتحان
     const exam = await Exam.findOne({ where: { examid } });
     if (!exam) {
-      return res.status(404).render('error', { message: 'Exam not found' });
+      return res.render('error-page', {
+        message: "الامتحان غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // جلب الأسئلة المرتبطة بالامتحان مع الخيارات
@@ -206,7 +217,10 @@ app.get('/exams/:id', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).render('error', { message: 'An error occurred while fetching the exam data.' });
+    return res.render('error-page', {
+      message: "حدث خطأ أثناء جلب البيانات",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -234,7 +248,10 @@ app.get('/results', verifyToken, async (req, res) => {
     res.render('results', { results }); // تمرير البيانات إلى ملف EJS
   } catch (error) {
     console.error('Error fetching results:', error);
-    res.status(500).send('حدث خطأ أثناء جلب النتائج.');
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب النتائج.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -247,7 +264,10 @@ app.post('/answers',verifyToken, async (req, res) => {
     console.log(req.body);
 
     if (!examid || !userid) {
-      return res.status(400).json({ message: 'Missing required fields (examid or userid).' });
+      return res.render('error-page', {
+        message: "البيانات المرسلة غير صحيحة",
+        errorCode: "BAD_REQUEST"
+    });
     }
 
     const correctOptions = await Option.findAll({
@@ -281,7 +301,10 @@ app.post('/answers',verifyToken, async (req, res) => {
     for (const [qid, options] of Object.entries(selected_option)) {
       const question = await Question.findOne({ where: { qid } });
       if (!question) {
-        return res.status(404).json({ message: `Question with qid ${qid} not found.` });
+        return res.render('error-page', {
+          message: "السؤال غير موجود",
+          errorCode: "NOT_FOUND"
+      });
       }
 
       if (question.qtype === 'multiple choice' || question.qtype === 'regular choice' || question.qtype === 'true/false') {
@@ -289,7 +312,10 @@ app.post('/answers',verifyToken, async (req, res) => {
           for (const opid of options) {
             const validOption = await Option.findOne({ where: { opid, qid } });
             if (!validOption) {
-              return res.status(400).json({ message: `Invalid option ${opid} for question ${qid}.` });
+              return res.render('error-page', {
+                message: "الخيار غير موجود",
+                errorCode: "NOT_FOUND"
+            });
             }
 
             await Answer.create({
@@ -303,7 +329,10 @@ app.post('/answers',verifyToken, async (req, res) => {
         } else {
           const validOption = await Option.findOne({ where: { opid: options, qid } });
           if (!validOption) {
-            return res.status(400).json({ message: `Invalid option ${options} for question ${qid}.` });
+            return res.render('error-page', {
+              message: "الخيار غير موجود",
+              errorCode: "NOT_FOUND"
+          });
           }
 
           await Answer.create({
@@ -319,7 +348,10 @@ app.post('/answers',verifyToken, async (req, res) => {
       if (question.qtype === 'fill in the blank') {
         const validOption = await Option.findOne({ where: { opid: options, qid } });
         if (!validOption) {
-          return res.status(400).json({ message: `Invalid option ${options} for question ${qid}.` });
+          return res.render('error-page', {
+            message: "الخيار غير موجود",
+            errorCode: "NOT_FOUND"
+        });
         }
 
         await Answer.create({
@@ -335,7 +367,10 @@ app.post('/answers',verifyToken, async (req, res) => {
     for (const qid in text_answer) {
       const textAnswer = text_answer[qid];
       if (!textAnswer) {
-        return res.status(400).json({ message: `Missing text answer for question ${qid}.` });
+        return res.render('error-page', {
+          message: "الإجابة النصية مطلوبة",
+          errorCode: "BAD_REQUEST"
+      });
       }
 
       await Answer.create({
@@ -370,7 +405,10 @@ app.post('/answers',verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Error processing data:', error);
-    res.status(500).json({ message: 'An error occurred while processing the data.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء حفظ البيانات",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -423,7 +461,10 @@ app.post('/exams', verifyToken, async (req, res) => {
     res.redirect('/teacher-page');
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error creating exam');
+    res.render('error-page', {
+      message: "حدث خطأ أثناء حفظ الامتحان",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -434,13 +475,19 @@ app.get('/exam/:id', verifyToken, async (req, res) => {
     const exam = await Exam.findByPk(examid);
 
     if (!exam) {
-      return res.status(404).render('error', { message: 'Exam not found' });
+      return res.render('error-page', {
+        message: "الامتحان غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     res.render('edit-exams', { exam });
   } catch (error) {
     console.error(error);
-    res.status(500).render('error', { message: 'An error occurred while fetching the exam.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب البيانات",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -457,14 +504,20 @@ app.put('/exams/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
     // التحقق مما إذا كان الامتحان موجودًا
     const exam = await Exam.findByPk(examid);
     if (!exam) {
-      return res.status(404).json({ error: 'Exam not found' });
+      return res.render('error-page', {
+        message: "الامتحان غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // استخراج البيانات المرسلة
     const { examname, examtime, examstate } = req.body;
 
     if (!examname?.trim() || !examtime?.trim() || !examstate) {
-      return res.status(400).json({ error: 'All fields are required' });
+      return res.render('error-page', {
+        message: "البيانات المرسلة غير صحيحة",
+        errorCode: "BAD_REQUEST"
+    });
     }
 
     // تحديث الامتحان
@@ -474,7 +527,10 @@ app.put('/exams/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
 
   } catch (error) {
     console.error('Error updating exam:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء تحديث الامتحان",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -506,7 +562,10 @@ app.delete('/exams/:id',verifyToken, checkUserRole('admin'), async (req, res) =>
 
   } catch (error) {
     console.error(error);
-    return res.status(400).send({ error: "An Error Happened" });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء حذف الامتحان",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -518,7 +577,10 @@ app.get('/users', verifyToken, checkUserRole('admin'), async (req, res) => {
     // استدعاء صفحة EJS وتمرير بيانات المستخدمين إليها
     res.render('users', { users });
   } catch (error) {
-    res.status(400).send({ error: "Error" });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب البيانات",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -532,7 +594,10 @@ app.get('/users/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
     // البحث عن المستخدم
     const user = await User.findOne({ where: { userid: userid } });
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.render('error-page', {
+        message: "المستخدم غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // جلب المواد والأقسام
@@ -543,7 +608,10 @@ app.get('/users/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
     res.render('EditUser', { user, subjects, departments });
   } catch (error) {
     console.error(error);
-    res.status(500).send('An error occurred while loading the edit page.');
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب البيانات",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -557,7 +625,10 @@ app.get('/not-active-users', verifyToken, checkUserRole('admin'), async (req, re
     // عرض صفحة EJS وتمرير البيانات إليها
     res.render('not-active-users', { users: not_active_users });
   } catch (error) {
-    res.status(500).send({ error: "حدث خطأ أثناء جلب البيانات" });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب البيانات",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -574,7 +645,10 @@ app.post('/activate-user/:id', verifyToken, checkUserRole('admin'), async (req, 
     // إعادة توجيه المستخدم إلى صفحة المستخدمين غير النشطين بعد التحديث
     res.redirect('/not-active-users');
   } catch (error) {
-    res.status(500).send({ error: "حدث خطأ أثناء تحديث الحالة" });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء تحديث حالة المستخدم",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -591,7 +665,10 @@ app.put('/users/:id',verifyToken, async (req, res) => {
     const user = await User.findOne({ where: { userid: userid } });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.render('error-page', {
+        message: "المستخدم غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // استخراج البيانات من الطلب
@@ -603,10 +680,16 @@ app.put('/users/:id',verifyToken, async (req, res) => {
 
     // التأكد من العثور على القسم والمادة
     if (!user_department) {
-      return res.status(404).json({ error: 'Department not found' });
+      return res.render('error-page', {
+        message: "القسم غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
     if (!user_subject) {
-      return res.status(404).json({ error: 'Subject not found' });
+      return res.render('error-page', {
+        message: "المادة غير موجودة",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // تحديث بيانات المستخدم
@@ -627,7 +710,10 @@ app.put('/users/:id',verifyToken, async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while updating the user.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء تحديث البيانات",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -642,7 +728,10 @@ app.post('/delete-user/:id', verifyToken, checkUserRole('admin'), async (req, re
     const user = await User.findOne({ where: { userid: userid } });
 
     if (!user) {
-      return res.status(404).json({ error: 'المستخدم غير موجود' });
+      res.render('error-page', {
+        message: "المستخدم غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // حذف المستخدم
@@ -653,7 +742,10 @@ app.post('/delete-user/:id', verifyToken, checkUserRole('admin'), async (req, re
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'حدث خطأ أثناء حذف المستخدم.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء حذف المستخدم",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -665,7 +757,10 @@ app.post('/teacher-register', async (req, res) => {
 
   // 1. التحقق من وجود جميع الحقول المطلوبة
   if (!user_name || !email || !password || !subname || !deptname) {
-      return res.status(400).json({ message: 'جميع الحقول مطلوبة' });
+      return res.render('error-page', {
+        message: "جميع الحقول مطلوبة",
+        errorCode: "BAD_REQUEST"
+    });
   }
 
   try {
@@ -676,16 +771,25 @@ app.post('/teacher-register', async (req, res) => {
       ]);
 
       if (!user_department) {
-          return res.status(404).json({ message: 'القسم غير موجود' });
+          return res.render('error-page', {
+            message: "القسم غير موجود",
+            errorCode: "NOT_FOUND"
+        });
       }
       if (!user_subject) {
-          return res.status(404).json({ message: 'المادة غير موجودة' });
+          return res.render('error-page', {
+            message: "المادة غير موجودة",
+            errorCode: "NOT_FOUND"
+        });
       }
 
       // 3. التحقق من عدم تكرار البريد الإلكتروني
       const existingUser = await User.findOne({ where: { email } });
       if (existingUser) {
-          return res.status(409).json({ message: 'البريد الإلكتروني مسجل مسبقًا' });
+          return res.render('error-page', {
+            message: "البريد الإلكتروني مسجل مسبقًا",
+            errorCode: "CONFLICT"
+        });
       }
 
       // 4. تشفير كلمة المرور
@@ -705,18 +809,10 @@ app.post('/teacher-register', async (req, res) => {
       res.redirect('/login');
 
   } catch (error) {
-      // 7. معالجة الأخطاء التفصيلية
-      console.error('خطأ في تسجيل المدرس:', error);
-      
-      // تحديد نوع الخطأ لإرسال رسالة مناسبة
-      const errorMessage = error.name === 'SequelizeUniqueConstraintError' 
-          ? 'البريد الإلكتروني مسجل مسبقًا' 
-          : 'حدث خطأ أثناء التسجيل';
-
-      res.status(500).json({ 
-          message: errorMessage,
-          details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء تسجيل المعلم",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -727,20 +823,29 @@ app.post('/student-register', async (req, res) => {
 
   // 1. التحقق من وجود جميع الحقول المطلوبة
   if (!user_name || !email || !password || !deptname) {
-      return res.status(400).json({ message: 'جميع الحقول مطلوبة' });
+      return res.render('error-page', {
+        message: "جميع الحقول مطلوبة",
+        errorCode: "BAD_REQUEST"
+    });
   }
 
   try {
       // 2. البحث عن القسم والتأكد من وجوده
       const user_department = await Department.findOne({ where: { deptname } });
       if (!user_department) {
-          return res.status(404).json({ message: 'القسم غير موجود' });
+          return res.render('error-page', {
+            message: "القسم غير موجود",
+            errorCode: "NOT_FOUND"
+        });
       }
 
       // 3. التحقق من عدم تكرار البريد الإلكتروني
       const existingUser = await User.findOne({ where: { email } });
       if (existingUser) {
-          return res.status(409).json({ message: 'البريد الإلكتروني مسجل مسبقًا' });
+          return res.render('error-page', {
+            message: "البريد الإلكتروني مسجل مسبقًا",
+            errorCode: "CONFLICT"
+        });
       }
 
       // 4. تشفير كلمة المرور
@@ -759,18 +864,10 @@ app.post('/student-register', async (req, res) => {
       res.redirect('/login');
 
   } catch (error) {
-      // 7. معالجة الأخطاء التفصيلية
-      console.error('خطأ في تسجيل الطالب:', error);
-      
-      // تحديد نوع الخطأ لإرسال رسالة مناسبة
-      const errorMessage = error.name === 'SequelizeUniqueConstraintError' 
-          ? 'البريد الإلكتروني مسجل مسبقًا' 
-          : 'حدث خطأ أثناء التسجيل';
-
-      res.status(500).json({ 
-          message: errorMessage,
-          details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء تسجيل الطالب",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -783,13 +880,19 @@ app.post('/login', async (req, res) => {
     // البحث عن المستخدم باستخدام البريد الإلكتروني
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.render('error-page', {
+        message: "البريد الإلكتروني غير مسجل",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // التحقق من كلمة المرور
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.render('error-page', {
+        message: "كلمة المرور غير صحيحة",
+        errorCode: "UNAUTHORIZED"
+    });
     }
 
     // إنشاء التوكن
@@ -823,7 +926,10 @@ app.post('/login', async (req, res) => {
     }
   } catch (error) {
     console.error('Error logging in:', error);
-    return res.status(500).json({ message: 'An error occurred while logging in', error });
+    return res.render('error-page', {
+      message: "حدث خطأ أثناء تسجيل الدخول",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -836,7 +942,10 @@ app.get('/logout', (req, res) => {
       req.session.destroy((err) => {
           if (err) {
               console.error('Error destroying session:', err);
-              return res.status(500).send('خطأ في تسجيل الخروج');
+              return res.render('error-page', {
+                message: "حدث خطأ أثناء تسجيل الخروج",
+                errorCode: "INTERNAL_SERVER_ERROR"
+            });
           }
           
           // مسح كوكي الجلسة
@@ -847,7 +956,10 @@ app.get('/logout', (req, res) => {
       });
   } catch (error) {
       console.error('Error during logout:', error);
-      res.status(500).json({ message: 'حدث خطأ أثناء تسجيل الخروج' });
+      res.render('error-page', {
+        message: "حدث خطأ أثناء تسجيل الخروج",
+        errorCode: "INTERNAL_SERVER_ERROR"
+    });
   }
 });
 
@@ -865,7 +977,10 @@ app.get('/departments', verifyToken, checkUserRole('admin'), async (req, res) =>
     res.render('departments', { departments, message: null });
   } catch (error) {
     console.error(error);
-    res.status(500).send('حدث خطأ أثناء جلب الأقسام.');
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب الأقسام.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -878,13 +993,19 @@ app.get('/departments/:id', verifyToken, checkUserRole('admin'), async (req, res
     const department = await Department.findOne({ where: { deptid: deptid } });
 
     if (!department) {
-      return res.status(404).json({ error: 'Department not found' });
+      return res.render('error-page', {
+        message: "القسم غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     res.render('update-department', { department, message: '' }); // تم إضافة message هنا
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while fetching the department.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب القسم.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -895,13 +1016,19 @@ try{
 
 const { deptname, deptstages} = req.body;
 if (!deptname || !deptstages) {
-    return res.status(400).json({ message: 'All fields are required' });
+    return res.render('error-page', {
+      message: "جميع الحقول مطلوبة",
+      errorCode: "BAD_REQUEST"
+  });
 }
   
 const department = await Department.create({ deptname, deptstages });
 return res.redirect('/departments');
 }catch(error){
-    console.log(error)
+  res.render('error-page', {
+    message: "حدث خطأ أثناء إنشاء القسم.",
+    errorCode: "INTERNAL_SERVER_ERROR"
+});
 }
 });
 
@@ -915,7 +1042,10 @@ app.put('/departments/:id', verifyToken, checkUserRole('admin'), async (req, res
     const department = await Department.findOne({ where: { deptid: deptid } });
 
     if (!department) {
-      return res.status(404).json({ error: 'Department not found' });
+      return res.render('error-page', {
+        message: "القسم غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // تحديث بيانات القسم
@@ -932,7 +1062,10 @@ app.put('/departments/:id', verifyToken, checkUserRole('admin'), async (req, res
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while updating the department.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء تحديث القسم.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -948,13 +1081,19 @@ app.delete('/departments/:id', async (req, res) => {
       });
 
       if (!deletedDepartment) {
-          return res.status(404).json({ message: "القسم غير موجود" });
+        res.render('error-page', {
+          message: "حدث خطأ أثناء حذف القسم.",
+          errorCode: "INTERNAL_SERVER_ERROR"
+      });
       }
 
       res.status(200).json({ message: "تم حذف القسم بنجاح" });
   } catch (error) {
       console.error("حدث خطأ أثناء الحذف:", error);
-      res.status(500).json({ message: "حدث خطأ أثناء حذف القسم" });
+      res.render('error-page', {
+        message: "حدث خطأ أثناء حذف القسم.",
+        errorCode: "INTERNAL_SERVER_ERROR"
+    });
   }
 });
 
@@ -972,7 +1111,10 @@ app.get('/subjects', verifyToken, checkUserRole('admin'), async (req, res) => {
     res.render('subjects', { subjects, message: null });
   } catch (error) {
     console.error(error);
-    res.status(500).send('حدث خطأ أثناء جلب المواد الدراسية.');
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب المواد الدراسية.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -987,13 +1129,19 @@ app.get('/subjects/:id',verifyToken, checkUserRole('admin'), async (req, res) =>
     const subject = await Subject.findOne({ where: { subid: subid } });
 
     if (!subject) {
-      return res.status(404).json({ error: 'Subject not found' });
+      return res.render('error-page', {
+        message: "المادة غير موجودة",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     res.render('update-subjects', { subject}); 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while fetching the subject.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب المادة.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -1007,13 +1155,20 @@ try {
 const { subname, substage, deptid} = req.body;
 
 if (!subname || !substage || !deptid) {
-    return res.status(400).json({ message: 'All fields are required' });
+    return res.render('error-page', {
+      message: "جميع الحقول مطلوبة",
+      errorCode: "BAD_REQUEST"
+  });
 }
     const user_department = await Department.findOne({ where: { deptid } });
     const subject = await Subject.create({ subname, substage, deptid: user_department.deptid});
     return res.redirect('/subjects');
 } catch (error) {
     console.log(error);
+    res.render('error-page', {
+      message: "حدث خطأ أثناء إنشاء المادة.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
 }
 
 });
@@ -1029,7 +1184,10 @@ app.put('/subjects/:id',verifyToken, checkUserRole('admin'), async (req, res) =>
     const subject = await Subject.findOne({ where: { subid: subid } });
 
     if (!subject) {
-      return res.status(404).json({ error: 'Subject not found' });
+      return res.render('error-page', {
+        message: "المادة غير موجودة",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // تحديث بيانات المادة
@@ -1044,7 +1202,10 @@ app.put('/subjects/:id',verifyToken, checkUserRole('admin'), async (req, res) =>
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while updating the subject.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء تحديث المادة.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -1063,17 +1224,23 @@ app.delete('/subjects/:id',verifyToken, checkUserRole('admin'), async (req, res)
     const subject = await Subject.findOne({ where: { subid: subid } });
 
     if (!subject) {
-      return res.status(404).json({ error: 'Subject not found' });
+      return res.render('error-page', {
+        message: "المادة غير موجودة",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // حذف المادة
     await Subject.destroy({ where: { subid: subid } });
 
     // إرجاع النتيجة
-    res.redirect('/subjects');  
+    res.status(200).json({ message: 'Subject deleted successfully.' });
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: "An error happened while deleting the subject" });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء حذف المادة.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -1093,7 +1260,10 @@ app.get('/questions', verifyToken, checkUserRole('admin'), async (req, res) => {
     res.render('questions', { questions, message: null });
   } catch (error) {
     console.error(error);
-    res.status(500).send('حدث خطأ أثناء جلب الأسئلة.');
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب الأسئلة.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -1115,7 +1285,10 @@ app.get('/questions/:id', verifyToken, checkUserRole('admin'), async (req, res) 
     res.render('question-details', { question, message: null });
   } catch (error) {
     console.error(error);
-    res.status(500).send('حدث خطأ أثناء جلب السؤال.');
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب السؤال.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -1152,21 +1325,31 @@ app.put('/questions/:id', verifyToken, checkUserRole('admin'), async (req, res) 
               where: { 
                 qid: qid, // ربط الخيار بالسؤال
                 opid: correctOption.oid // استخدام opid لتحديد الخيار الصحيح
-              } 
+              }
             }
           );
         } else {
-          console.error(`Missing 'oid' for correctOption at index ${i}:`, correctOption);
+          res.render('error-page', {
+            message: `Missing 'oid' for correctOption at index ${i}:`,
+            errorCode: "INTERNAL_SERVER_ERROR"
+        });
+          
         }
       } else {
-        console.warn(`No matching correctOption found for index ${i}`);
+        res.render('error-page', {
+          message: `No matching correctOption found for index ${i}`,
+          errorCode: "INTERNAL_SERVER_ERROR"
+      });
       }
     }
 
     res.status(200).json({ message: 'Question updated successfully.' });
   } catch (error) {
     console.error("Error details:", error);
-    res.status(500).json({ error: 'An error occurred while updating the question.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء تحديث السؤال.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -1188,7 +1371,10 @@ app.delete('/questions/:id', verifyToken, checkUserRole('admin'),async (req, res
     const question = await Question.findOne({ where: { qid: qid } });
 
     if (!question) {
-      return res.status(404).json({ error: 'Question not found' });
+      return res.render('error-page', {
+        message: "السؤال غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // حذف السؤال
@@ -1197,7 +1383,10 @@ app.delete('/questions/:id', verifyToken, checkUserRole('admin'),async (req, res
     res.status(200).json({ message: 'Question deleted successfully.' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while deleting the question.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء حذف السؤال.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -1213,7 +1402,10 @@ app.get('/options', verifyToken, checkUserRole('admin'),async (req, res) => {
     res.json(options);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while fetching options.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب الخيارات.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
@@ -1227,39 +1419,13 @@ app.get('/options/:id', verifyToken, checkUserRole('admin'),async (req, res) => 
     res.json(options);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while fetching options.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء جلب الخيار.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 
-
-// // update option endpoint
-// app.put('/options/:id', verifyToken, checkUserRole('admin'),async (req, res) => {
- 
-//   try {
-
-    
-//     const opid = req.params.id;
-//     const { optext, iscorrect } = req.body;
-
-//     // البحث عن الخيار
-//     const option = await Option.findOne({ where: { opid: opid } });
-
-//     if (!option) {
-//       return res.status(404).json({ error: 'Option not found' });
-//     }
-
-//     // تحديث بيانات الخيار
-//     await Option.update(
-//       { optext: optext, iscorrect: iscorrect },
-//       { where: { opid: opid } }
-//     );
-
-//     res.status(200).json({ message: 'Option updated successfully.' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'An error occurred while updating the option.' });
-//   }
-// });
 
 
 
@@ -1275,7 +1441,10 @@ app.delete('/options/:id',verifyToken, checkUserRole('admin'), async (req, res) 
     const option = await Option.findOne({ where: { opid: opid } });
 
     if (!option) {
-      return res.status(404).json({ error: 'Option not found' });
+      return res.render('error-page', {
+        message: "الخيار غير موجود",
+        errorCode: "NOT_FOUND"
+    });
     }
 
     // حذف الخيار
@@ -1284,7 +1453,10 @@ app.delete('/options/:id',verifyToken, checkUserRole('admin'), async (req, res) 
     res.status(200).json({ message: 'Option deleted successfully.' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while deleting the option.' });
+    res.render('error-page', {
+      message: "حدث خطأ أثناء حذف الخيار.",
+      errorCode: "INTERNAL_SERVER_ERROR"
+  });
   }
 });
 

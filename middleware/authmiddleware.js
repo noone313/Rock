@@ -7,7 +7,10 @@ const verifyToken = (req, res, next) => {
     const token = req.cookies.token; 
 
     if (!token) {
-        return res.status(403).json({ message: 'Access denied. No token provided.' });
+        return res.render('error-page', {
+            message: "لم يتم توفير رمز الدخول (Token). يرجى تسجيل الدخول أولاً.",
+            errorCode: "UNAUTHORIZED"
+        });
     }
 
     try {
@@ -16,7 +19,10 @@ const verifyToken = (req, res, next) => {
         req.user = decoded; // تخزين بيانات المستخدم في `req.user`
         next();  // الانتقال إلى الخطوة التالية
     } catch (error) {
-        return res.status(400).json({ message: 'Invalid token.' });
+        return res.render('error-page', {
+            message: "لم يتم توفير رمز الدخول (Token). يرجى تسجيل الدخول أولاً.",
+            errorCode: "UNAUTHORIZED"
+        });
     }
 };
 
@@ -28,16 +34,25 @@ const checkUserRole = (requiredRole) => {
         try {
             const user = await User.findOne({ where: { userid: req.user.userid } });
             if (!user) {
-                return res.status(404).json({ error: 'User not found' });
+                return res.render('error-page', {
+                    message: "لم يتم العثور على المستخدم. يرجى تسجيل الدخول مرة أخرى.",
+                    errorCode: "UNAUTHORIZED"
+                });
             }
             if (user.usertype !== requiredRole) {
-                return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
+                return res.render('error-page', {
+                    message: "ليس لديك الصلاحية للوصول إلى هذه الصفحة.",
+                    errorCode: "UNAUTHORIZED"
+                });
             }
             req.user.subid = user.subid; // تأكد من أن subid موجود في req.user
             next();
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ error: 'An error occurred while checking user role' });
+            return res.render('error-page', {
+                message: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+                errorCode: "UNAUTHORIZED"
+            });
         }
     };
 };

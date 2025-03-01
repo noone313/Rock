@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
        else{
        btn_Register.addEventListener('click',function(){
-           window.location.href ='register';
+           window.location.href ='register-student';
        });}
    });
    

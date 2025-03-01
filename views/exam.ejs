@@ -14,6 +14,11 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet"
   />
+  <!-- Font Awesome for icons -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    rel="stylesheet"
+  />
   <style>
     /* تعريف ألوان الثيم باستخدام متغيرات CSS */
     :root {
@@ -129,6 +134,180 @@
       background-color: var(--primary-hover);
       border-color: var(--primary-hover);
     }
+    /* أيقونة الآلة الحاسبة */
+    .calculator-icon {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 15px;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      transition: transform 0.3s, background-color 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .calculator-icon:hover {
+      background-color: var(--primary-hover);
+      transform: scale(1.1);
+    }
+
+    .calculator-icon i {
+      font-size: 1.5rem;
+    }
+
+    /* نافذة الآلة الحاسبة */
+    .calculator-modal {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      width: 300px;
+    }
+
+    .calculator-content {
+      padding: 15px;
+    }
+
+    .calculator-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .calculator-header span {
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+
+    .calculator-header button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--primary-color);
+    }
+
+    .calculator-header button:hover {
+      color: var(--primary-hover);
+    }
+
+    .calculator-display input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1.5rem;
+      text-align: right;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .calculator-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .calculator-buttons button {
+      padding: 15px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 5px;
+      background-color: var(--surface);
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .calculator-buttons button:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .calculator-buttons .equal {
+      grid-column: span 4;
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .calculator-buttons .equal:hover {
+      background-color: var(--primary-hover);
+    }
+    /* أنماط المساعد الافتراضي */
+.evc-companion {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+.evc-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.evc-avatar:hover {
+  transform: scale(1.1) rotate(10deg);
+}
+
+.evc-message {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  width: 300px;
+  display: none;
+  animation: slideIn 0.5s ease-out;
+  border: 2px solid var(--primary-color);
+}
+
+.evc-message.show {
+  display: block;
+}
+
+.evc-resources-panel {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  width: 300px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* تأثيرات للأسئلة عند التفاعل */
+.question-highlight {
+  animation: pulseHighlight 1.5s ease-in-out;
+}
+
+@keyframes pulseHighlight {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); box-shadow: 0 4px 15px rgba(0,123,255,0.3); }
+  100% { transform: scale(1); }
+}
   </style>
 </head>
 <body>
@@ -254,8 +433,130 @@
     </form>
   </div>
 
+  <!-- أيقونة الآلة الحاسبة -->
+  <div id="calculator-icon" class="calculator-icon">
+    <i class="fas fa-calculator"></i>
+  </div>
+
+  <!-- نافذة الآلة الحاسبة -->
+  <div id="calculator-modal" class="calculator-modal">
+    <div class="calculator-content">
+      <div class="calculator-header">
+        <span>آلة حاسبة</span>
+        <button id="close-calculator">&times;</button>
+      </div>
+      <div class="calculator-display">
+        <input type="text" id="calculator-input" readonly />
+      </div>
+      <div class="calculator-buttons">
+        <button data-value="7">7</button>
+        <button data-value="8">8</button>
+        <button data-value="9">9</button>
+        <button data-value="/">/</button>
+        <button data-value="4">4</button>
+        <button data-value="5">5</button>
+        <button data-value="6">6</button>
+        <button data-value="*">*</button>
+        <button data-value="1">1</button>
+        <button data-value="2">2</button>
+        <button data-value="3">3</button>
+        <button data-value="-">-</button>
+        <button data-value="0">0</button>
+        <button data-value=".">.</button>
+        <button data-value="C">C</button>
+        <button data-value="+">+</button>
+        <button data-value="=" class="equal">=</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- المساعد الافتراضي -->
+<div class="evc-companion">
+  <div class="evc-avatar">
+    <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" 
+         class="avatar-img" 
+         alt="مساعد افتراضي"
+         width="60">
+    <div class="evc-message alert alert-info"></div>
+  </div>
+  <div class="evc-resources-panel card mt-2"></div>
+</div>
+
   <script>
+    class EVCAssistant {
+  constructor() {
+    this.stressLevel = 0;
+    this.startTime = Date.now();
+    this.messageTimeout = 3000; // مدة الرسالة الافتراضية
+    this.setupEventListeners();
+  }
+
+  // عرض رسالة للمستخدم مع مدة ظهور قابلة للتعديل
+  showMessage(message, duration = this.messageTimeout) {
+    const msgElement = document.querySelector('.evc-message');
+    if (!msgElement) return;
+    msgElement.textContent = message;
+    msgElement.classList.add('show');
+    setTimeout(() => msgElement.classList.remove('show'), duration);
+  }
+
+  // تحليل سلوك المستخدم لتحديد مستوى التوتر وتحسين الردود
+  analyzeBehavior(target) {
+    const timeSpent = (Date.now() - this.startTime) / 1000;
+    if (target.tagName === 'TEXTAREA') {
+      const typingSpeed = target.value.length / timeSpent;
+      // إذا كان معدل الكتابة منخفضاً، زِد مستوى التوتر؛ وإذا كان مرتفعاً، قلله تدريجياً
+      if (typingSpeed < 0.3) {
+        this.stressLevel = Math.min(100, this.stressLevel + 15);
+      } else {
+        this.stressLevel = Math.max(0, this.stressLevel - 5);
+      }
+    }
+
+    // مراقبة العناصر الاختيارية (radio/checkbox)
+    if (target.type === 'radio' || target.type === 'checkbox') {
+      setTimeout(() => {
+        const isAnswered = target.checked || target.closest('.card').querySelector('input:checked');
+        if (!isAnswered) {
+          this.showMessage('💡 هل تريد مراجعة هذا السؤال لاحقاً؟', 4000);
+        }
+      }, 5000);
+    }
+  }
+
+  // إعداد الاستماع للأحداث على عناصر الإدخال
+  setupEventListeners() {
+    const avatar = document.querySelector('.evc-avatar');
+    if (avatar) {
+      avatar.addEventListener('click', () => {
+        this.showMessage('🎮 يمكنك استخدام الآلة الحاسبة بالضغط على الأيقونة اليمنى!');
+      });
+    }
+
+    // مراقبة جميع عناصر الإدخال والنصوص
+    document.querySelectorAll('input, textarea, select').forEach(element => {
+      element.addEventListener('input', (e) => {
+        this.analyzeBehavior(e.target);
+
+        // عرض رسالة تهدئة عند ارتفاع مستوى التوتر
+        if (this.stressLevel > 70) {
+          this.showMessage('🧘 تنفس بعمق، أنت تقوم بعمل رائع!', 4000);
+          const card = e.target.closest('.card');
+          if (card) {
+            card.classList.add('question-highlight');
+            setTimeout(() => card.classList.remove('question-highlight'), 1500);
+          }
+        }
+
+        
+      });
+    });
+  }
+}
+
+
     document.addEventListener("DOMContentLoaded", () => {
+      new EVCAssistant();
       const draggables = document.querySelectorAll(".draggable");
       const dropzones = document.querySelectorAll(".dropzone");
 
@@ -298,8 +599,13 @@
       });
 
       // Form submission handling
-      document.querySelector("#exam-form").addEventListener("submit", (e) => {
-        e.preventDefault();
+      document.querySelector("#exam-form").addEventListener("submit", function(e) {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = `
+      <span class="spinner-border spinner-border-sm" role="status"></span>
+      جاري الإرسال...
+    `;
+    submitBtn.disabled = true;
 
         const formData = {
           examid: document.querySelector('[name="examid"]').value,
@@ -387,6 +693,41 @@
           .catch((error) => {
             console.error("Error submitting form:", error);
           });
+      });
+
+      // التحكم في الآلة الحاسبة
+      const calculatorIcon = document.getElementById('calculator-icon');
+      const calculatorModal = document.getElementById('calculator-modal');
+      const closeCalculator = document.getElementById('close-calculator');
+      const calculatorInput = document.getElementById('calculator-input');
+      const calculatorButtons = document.querySelectorAll('.calculator-buttons button');
+
+      // فتح وإغلاق الآلة الحاسبة
+      calculatorIcon.addEventListener('click', () => {
+        calculatorModal.style.display = 'block';
+      });
+
+      closeCalculator.addEventListener('click', () => {
+        calculatorModal.style.display = 'none';
+      });
+
+      // إضافة وظائف الآلة الحاسبة
+      calculatorButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const value = button.getAttribute('data-value');
+          
+          if (value === 'C') {
+            calculatorInput.value = '';
+          } else if (value === '=') {
+            try {
+              calculatorInput.value = eval(calculatorInput.value);
+            } catch (error) {
+              calculatorInput.value = 'Error';
+            }
+          } else {
+            calculatorInput.value += value;
+          }
+        });
       });
     });
   </script>

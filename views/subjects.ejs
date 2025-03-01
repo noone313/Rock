@@ -6,12 +6,14 @@
   <title>المواد الدراسية</title>
   <style>
     :root {
-      --primary-color: #007bff; /* اللون الأزرق */
-      --primary-hover: #0056b3; /* اللون الأزرق الغامق عند التمرير */
-      --background-color: #f8f9fa; /* اللون الخلفي الفاتح */
-      --text-color: #333; /* لون النص */
-      --form-background: #ffffff; /* لون الخلفية للنموذج */
-      --table-border: #ccc; /* لون حدود الجدول */
+      --primary-color: #007bff;
+      --primary-hover: #0056b3;
+      --background-color: #f8f9fa;
+      --text-color: #333;
+      --form-background: #ffffff;
+      --table-border: #ccc;
+      --danger-color: #dc3545;
+      --danger-hover: #b02a37;
     }
     body {
       font-family: Arial, sans-serif;
@@ -56,6 +58,17 @@
     a:hover {
       color: var(--primary-hover);
     }
+    .delete-btn {
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .delete-btn:hover {
+      background-color: var(--danger-hover);
+    }
   </style>
 </head>
 <body>
@@ -72,14 +85,18 @@
           <th>رقم المادة</th>
           <th>اسم المادة</th>
           <th>مرحلة التدريس للمادة</th>
+          <th>إجراء</th>
         </tr>
       </thead>
       <tbody>
         <% subjects.forEach(subject => { %>
-          <tr>
+          <tr id="row-<%= subject.subid %>">
             <td><%= subject.subid %></td>
             <td><a href="/subjects/<%= subject.subid %>"><%= subject.subname %></a></td>
             <td><%= subject.substage %></td>
+            <td>
+              <button class="delete-btn" onclick="deleteSubject('<%= subject.subid %>')">حذف</button>
+            </td>
           </tr>
         <% }); %>
       </tbody>
@@ -87,5 +104,34 @@
 
     <% } %>
   </div>
+
+  <script>
+    async function deleteSubject(subId) {
+        const confirmDelete = confirm("هل أنت متأكد من حذف هذه المادة؟");
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch(`/subjects/${subId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (response.ok) {
+                alert('تم الحذف بنجاح');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 100);
+            } else {
+                const errorData = await response.json();
+                alert(`خطأ في الحذف: ${errorData.message}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('حدث خطأ غير متوقع أثناء الحذف');
+        }
+    }
+  </script>
 </body>
 </html>

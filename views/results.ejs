@@ -1,78 +1,252 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نتائج الامتحانات</title>
-    <link rel="stylesheet" href="/styles.css"> <!-- رابط ملف CSS -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            text-align: center;
-        }
-        .container {
-            width: 80%;
-            margin: 20px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #007bff;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-        .passed {
-            color: green;
-            font-weight: bold;
-        }
-        .failed {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نتائج الامتحانات</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* أنماط الصفحة الرئيسية */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .container {
+      width: 90%;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    
+    h1 {
+      color: #2563eb;
+      margin-bottom: 2rem;
+      font-size: 2.2rem;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+    }
+    
+    th, td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    th {
+      background: #2563eb;
+      color: white;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    
+    tr:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .export-btn {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white !important;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      box-shadow: 0 4px 6px rgba(59,130,246,0.2);
+    }
+    
+    .export-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(59,130,246,0.3);
+    }
+    
+    .export-btn i {
+      font-size: 1.1rem;
+    }
+    
+    .passed {
+      color: #22c55e;
+      font-weight: 600;
+    }
+    
+    .failed {
+      color: #ef4444;
+      font-weight: 600;
+    }
+    
+    /* أنماط نموذج الشهادة المخفي */
+    .certificate-template {
+      position: absolute;
+      left: -9999px; /* لإخفاء النموذج عن العرض */
+      width: 1200px;
+      height: 800px;
+      background: #fff;
+      padding: 2rem;
+      text-align: center;
+      border: 10px solid #3B82F6;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+    
+    .certificate-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 2rem;
+    }
+    
+    .certificate-title {
+      font-size: 3.5rem;
+      color: #1D4ED8;
+      margin-bottom: 1rem;
+      font-family: 'Arial', sans-serif;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .certificate-text {
+      font-size: 1.8rem;
+      color: #1E293B;
+      line-height: 1.6;
+      margin: 2rem 0;
+    }
+    
+    .certificate-details {
+      font-size: 1.5rem;
+      color: #64748B;
+      margin: 1.5rem 0;
+    }
+    
+    .certificate-logo {
+      width: 150px;
+      margin-bottom: 1rem;
+    }
+    
+    .certificate-signature {
+      position: absolute;
+      bottom: 2rem;
+      right: 2rem;
+      text-align: center;
+      font-size: 1.2rem;
+      border-top: 2px solid #1D4ED8;
+      padding-top: 0.5rem;
+      width: 250px;
+      margin: 0 auto;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>نتائج الامتحانات</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>اسم الطالب</th>
-                    <th>البريد الإلكتروني</th>
-                    <th>الامتحان</th>
-                    <th>النتيجة</th>
-                    <th>الحالة</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% results.forEach(result => { %>
-                    <tr>
-                        <td><%= result.User.user_name %></td>
-                        <td><%= result.User.email %></td>
-                        <td><%= result.Exam.examname %></td>
-                        <td><%= result.total_score %></td>
-                        <td class="<%= result.passed ? 'passed' : 'failed' %>">
-                            <%= result.passed ? 'ناجح' : 'راسب' %>
-                        </td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
-    </div>
+  <div class="container">
+    <h1>نتائج الامتحانات 📊</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>اسم الطالب</th>
+          <th>البريد الإلكتروني</th>
+          <th>الامتحان</th>
+          <th>النتيجة</th>
+          <th>الحالة</th>
+          <th>التاريخ والوقت</th>
+          <th>تصدير</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% results.forEach(result => { %>
+          <tr id="result-<%= result.resultid %>">
+            <td class="student-name"><%= result.User.user_name %></td>
+            <td class="student-email"><%= result.User.email %></td>
+            <td class="exam-name"><%= result.Exam.examname %></td>
+            <td class="score"><%= result.total_score %></td>
+            <td class="status <%= result.passed ? 'passed' : 'failed' %>">
+              <%= result.passed ? 'ناجح 🎉' : 'راسب ⚠️' %>
+            </td>
+            <td class="date"><%= new Date(result.createdAt).toLocaleString('ar-EG') %></td>
+            <td>
+              <button class="export-btn" onclick="exportCertificate('<%= result.resultid %>')">
+                <i class="fas fa-download"></i>
+                تصدير الشهادة
+              </button>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- نموذج الشهادة المخفي -->
+  <div class="certificate-template" id="certificateTemplate">
+    <div class="certificate-content">
+      <img src="university-logo.png" alt="شعار الجامعة" class="certificate-logo">
+      <h1 class="certificate-title">شهادة نجاح</h1>
+      <p class="certificate-text">
+        تُمنح هذه الشهادة لـ
+        <br>
+        <strong id="certStudentName">[اسم الطالب]</strong>
+        <br><br>
+        لإثبات اجتيازه بنجاح امتحان مادة
+        <br>
+        <strong id="certExamName">[اسم الامتحان]</strong>
+      </p>
+      <div class="certificate-details">
+        <p>النتيجة: <span id="certScore">[النتيجة]</span></p>
+        <p>الحالة: <span id="certStatus">[الحالة]</span></p>
+        <p>تاريخ الإجراء: <span id="certDate">[التاريخ]</span></p>
+      </div>
+        
+  </div>
+  
+  <!-- استدعاء مكتبة html2canvas -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script>
+    async function exportCertificate(resultId) {
+      try {
+        // الحصول على بيانات الصف من الجدول
+        const row = document.getElementById('result-' + resultId);
+        const studentName = row.querySelector('.student-name').textContent.trim();
+        const examName = row.querySelector('.exam-name').textContent.trim();
+        const score = row.querySelector('.score').textContent.trim();
+        const status = row.querySelector('.status').textContent.trim();
+        const date = row.querySelector('.date').textContent.trim();
+  
+        // تعبئة بيانات نموذج الشهادة
+        document.getElementById('certStudentName').textContent = studentName;
+        document.getElementById('certExamName').textContent = examName;
+        document.getElementById('certScore').textContent = score;
+        document.getElementById('certStatus').textContent = status;
+        document.getElementById('certDate').textContent = date;
+  
+        // إظهار نموذج الشهادة المخفي مؤقتًا إذا لزم الأمر (لا حاجة إذا كان خارج الشاشة)
+        const certificateElement = document.getElementById('certificateTemplate');
+  
+        // استخدام html2canvas لالتقاط النموذج
+        const canvas = await html2canvas(certificateElement, {
+          useCORS: true,
+          scale: 2,
+          logging: true
+        });
+  
+        // تحويل الصورة إلى رابط للتحميل
+        const link = document.createElement('a');
+        link.download = `شهادة-${studentName}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+  
+      } catch (error) {
+        console.error('حدث خطأ أثناء تصدير الشهادة:', error);
+        alert('حدث خطأ أثناء تصدير الشهادة. يرجى المحاولة مرة أخرى.');
+      }
+    }
+  </script>
 </body>
 </html>
