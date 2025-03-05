@@ -219,12 +219,19 @@ app.get('/exams/:id', verifyToken, async (req, res) => {
         };
       })
     );
+    const user = await User.findOne({
+      where: { userid },
+      attributes: ['user_name', 'email']
+    });
+    
 
     // عرض البيانات في قالب EJS
     return res.render('exam', {
       exam: exam.toJSON(),
       questions: questionsWithOptions,
       userid,
+      user_name: user.user_name, // تمرير user_name
+      email: user.email 
     });
   } catch (error) {
     console.error(error);
