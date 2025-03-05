@@ -6,87 +6,140 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <title>Rock - Student Portal</title>
     <style>
-        :root {
-            --primary: #3B82F6;
-            --primary-hover: #2563EB;
-            --surface: #FFFFFF;
-            --background: #F8FAFC;
-            --text-primary: #1E293B;
-            --text-secondary: #64748B;
-            --border: #E2E8F0;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-            --radius-md: 8px;
-        }
+    :root {
+    --primary: #3B82F6;
+    --primary-hover: #2563EB;
+    --surface: #FFFFFF;
+    --background: #F8FAFC;
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --border: #E2E8F0;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+    --radius-md: 8px;
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
 
-        body {
-            background: var(--background);
-            color: var(--text-primary);
-        }
+body {
+    background: var(--background);
+    color: var(--text-primary);
+}
 
-        /* Navigation Styles */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: var(--surface);
-            box-shadow: var(--shadow-sm);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+/* Navigation Styles */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
 
-        .nav_logo a {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-decoration: none;
-        }
+.nav_logo a {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+}
 
-        .nav_links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
+.nav_links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
 
-        .nav_links a {
-            text-decoration: none;
-            color: var(--text-primary);
-            font-weight: 500;
-            transition: color 0.3s;
-        }
+.nav_links a {
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: color 0.3s;
+}
 
-        .nav_links a:hover {
-            color: var(--primary);
-        }
+.nav_links a:hover {
+    color: var(--primary);
+}
 
-        .nav_btns {
-            position: relative;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
+.nav_btns {
+    position: relative;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
 
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+.btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background 0.3s;
+}
 
-        .btn:hover {
-            background: var(--primary-hover);
-        }
+.btn:hover {
+    background: var(--primary-hover);
+}
+
+.card {
+    position: absolute;
+    right: 0;
+    top: 120%;
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    min-width: 250px;
+    display: none;
+}
+
+.card.show {
+    display: block;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.user-info i {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.user-info h4 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.user-info p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.logout-btn:hover {
+    color: var(--primary);
+}
+
 
         .card {
             position: absolute;
@@ -152,26 +205,25 @@
             justify-content: space-between;
             align-items: center;
         }
+/* Responsive Design */
+@media (max-width: 768px) {
+    nav {
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            nav {
-                padding: 1rem;
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-
-            .nav_links {
-                order: 3;
-                width: 100%;
-                justify-content: center;
-            }
-
-            #cardss {
+    .nav_links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+    }
+    #cardss {
                 grid-template-columns: 1fr;
                 padding: 1rem;
             }
-        }
+}
+       
     </style>
 </head>
 <body>

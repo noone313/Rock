@@ -71,9 +71,20 @@ const departments = await Department.findAll();
 });
 
 
-app.get('/teacher-page', async(req,res)=>{
+app.get('/teacher-page',verifyToken ,async(req,res)=>{
 
-   res.render('TeacherPage');
+
+  const userid = req.user.userid;
+  // جلب بيانات المستخدم الحالي
+const user = await User.findOne({
+  where: { userid },
+  attributes: ['user_name', 'email']
+});
+
+
+
+   res.render('TeacherPage',{user_name: user.user_name, // تمرير user_name
+    email: user.email }); // تمرير email
 
 });
 
@@ -245,16 +256,25 @@ app.get('/results', verifyToken, async (req, res) => {
       order: [['createdAt', 'DESC']], // ترتيب النتائج من الأحدث إلى الأقدم
     });
 
-    res.render('results', { results }); // تمرير البيانات إلى ملف EJS
+    // جلب بيانات المستخدم الحالي
+    const user = await User.findOne({
+      where: { userid },
+      attributes: ['user_name', 'email']
+    });
+
+    res.render('results', { 
+      results,
+      user_name: user.user_name, // تمرير user_name
+      email: user.email // تمرير email
+    });
   } catch (error) {
     console.error('Error fetching results:', error);
     res.render('error-page', {
       message: "حدث خطأ أثناء جلب النتائج.",
       errorCode: "INTERNAL_SERVER_ERROR"
-  });
+    });
   }
 });
-
 
 
 
@@ -264,10 +284,7 @@ app.post('/answers',verifyToken, async (req, res) => {
     console.log(req.body);
 
     if (!examid || !userid) {
-      return res.render('error-page', {
-        message: "البيانات المرسلة غير صحيحة",
-        errorCode: "BAD_REQUEST"
-    });
+      return res.status(400).json({ message: 'Missing required fields (examid or userid).' });
     }
 
     const correctOptions = await Option.findAll({
@@ -301,10 +318,7 @@ app.post('/answers',verifyToken, async (req, res) => {
     for (const [qid, options] of Object.entries(selected_option)) {
       const question = await Question.findOne({ where: { qid } });
       if (!question) {
-        return res.render('error-page', {
-          message: "السؤال غير موجود",
-          errorCode: "NOT_FOUND"
-      });
+        return res.status(404).json({ message: `Question with qid ${qid} not found.` });
       }
 
       if (question.qtype === 'multiple choice' || question.qtype === 'regular choice' || question.qtype === 'true/false') {
@@ -312,10 +326,7 @@ app.post('/answers',verifyToken, async (req, res) => {
           for (const opid of options) {
             const validOption = await Option.findOne({ where: { opid, qid } });
             if (!validOption) {
-              return res.render('error-page', {
-                message: "الخيار غير موجود",
-                errorCode: "NOT_FOUND"
-            });
+              return res.status(400).json({ message: `Invalid option ${opid} for question ${qid}.` });
             }
 
             await Answer.create({
@@ -329,10 +340,7 @@ app.post('/answers',verifyToken, async (req, res) => {
         } else {
           const validOption = await Option.findOne({ where: { opid: options, qid } });
           if (!validOption) {
-            return res.render('error-page', {
-              message: "الخيار غير موجود",
-              errorCode: "NOT_FOUND"
-          });
+            return res.status(400).json({ message: `Invalid option ${options} for question ${qid}.` });
           }
 
           await Answer.create({
@@ -348,10 +356,7 @@ app.post('/answers',verifyToken, async (req, res) => {
       if (question.qtype === 'fill in the blank') {
         const validOption = await Option.findOne({ where: { opid: options, qid } });
         if (!validOption) {
-          return res.render('error-page', {
-            message: "الخيار غير موجود",
-            errorCode: "NOT_FOUND"
-        });
+          return res.status(400).json({ message: `Invalid option ${options} for question ${qid}.` });
         }
 
         await Answer.create({
@@ -367,10 +372,7 @@ app.post('/answers',verifyToken, async (req, res) => {
     for (const qid in text_answer) {
       const textAnswer = text_answer[qid];
       if (!textAnswer) {
-        return res.render('error-page', {
-          message: "الإجابة النصية مطلوبة",
-          errorCode: "BAD_REQUEST"
-      });
+        return res.status(400).json({ message: `Missing text answer for question ${qid}.` });
       }
 
       await Answer.create({
@@ -395,7 +397,7 @@ app.post('/answers',verifyToken, async (req, res) => {
     });
 
     console.log(selectedOptions, correctOptionIds, score);
-    
+
     res.status(200).json({
       message: 'Answers and result saved successfully.',
       selectedOptions,
@@ -405,19 +407,9 @@ app.post('/answers',verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Error processing data:', error);
-    res.render('error-page', {
-      message: "حدث خطأ أثناء حفظ البيانات",
-      errorCode: "INTERNAL_SERVER_ERROR"
-  });
+    res.status(500).json({ message: 'An error occurred while processing the data.' });
   }
 });
-
-
-
-
-
-
-
 
 
 

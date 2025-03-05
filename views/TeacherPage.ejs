@@ -4,50 +4,393 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Exam</title>
-    <link rel="stylesheet" href="teacherPage.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+           :root {
+            --primary: #3B82F6;           /* Blue */
+            --primary-hover: #2563EB;       /* Darker Blue */
+            --secondary: #2563EB;           /* Secondary blue (same as primary-hover) */
+            --surface: #FFFFFF;             /* White */
+            --background: #F8FAFC;          /* Light background */
+            --light: #FFFFFF;               /* White */
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --radius-md: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-primary);
+        }
+
+        /* Navigation Styles */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--surface);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav_logo a {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav_links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav_links a {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav_links a:hover {
+            color: var(--primary);
+        }
+
+        .nav_btns {
+            position: relative;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .card {
+            position: absolute;
+            right: 0;
+            top: 120%;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            min-width: 250px;
+            display: none;
+        }
+
+        .card.show {
+            display: block;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .user-info i {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .user-info h4 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .user-info p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .logout-btn:hover {
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background: var(--surface); /* White surface */
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 3rem;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 2.5rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        h1:after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: var(--secondary);
+            margin: 1rem auto;
+        }
+
+        .form-section {
+            background: rgba(244, 245, 247, 0.5);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            margin: 1.2rem 0 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 179, 255, 0.2);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white !important;
+            border: none;
+            padding: 0.8rem 1.6rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            margin-top: 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Style for delete option button (always blue) */
+        .delete-option-btn {
+            background: var(--primary);
+            color: var(--surface);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+        }
+        .delete-option-btn:hover {
+            transform: scale(1.05);
+        }
+
+        #questionsSection {
+            margin-top: 2rem;
+        }
+
+        .question-section {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+        }
+
+        .question-section h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+        }
+
+        .options {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--light);
+            border-radius: var(--radius-md);
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            border: 1px solid #f1f5f9;
+        }
+
+        .option label {
+            margin: 0;
+            flex: 1;
+        }
+
+        .option input[type="text"] {
+            flex: 3;
+            margin: 0;
+        }
+
+        .iscorrect-checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--secondary);
+        }
+
+        #submitButton {
+            width: 100%;
+            justify-content: center;
+            font-size: 1.1rem;
+            padding: 1rem;
+        }
+        /* Responsive Design */
+@media (max-width: 768px) {
+    nav {
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .nav_links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+    }}
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- قسم معلومات الامتحان -->
-        <form id="examForm" action="/exams" method="POST">
-            <h1>Create Exam</h1>
+    <nav>
+        <div class="nav_header">
+            <div class="nav_logo">
+                <a href="/">Rock</a>
+            </div>
+        </div>
+        
+        <ul class="nav_links">
+            <li><a href="/active-exams">Active Exams</a></li>
+            <li><a href="/results">Results</a></li>
+        </ul>
 
-            <!-- معلومات الامتحان -->
+        <div class="nav_btns">
+            <button class="btn" id="profile-btn">
+                <i class="fa-solid fa-user"></i>
+            </button>
+            <div class="card" id="profile-card">
+                <div class="user-info">
+                    <i class="fa-regular fa-user"></i>
+                    <h4><%= user_name %></h4>
+                    <p><%= email %></p>
+                </div>
+                <hr>
+                <a href="/logout" class="logout-btn" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <form id="examForm" action="/exams" method="POST">
+            <h1><i class="fas fa-edit"></i> Create New Exam</h1>
+
             <div class="form-section">
                 <label for="examname">Exam Name:</label>
                 <input type="text" id="examname" name="exam[examname]" required>
 
-                <label for="examtime">Exam Time (in minutes):</label>
+                <label for="examtime">Exam Time (minutes):</label>
                 <input type="number" id="examtime" name="exam[examtime]" required>
 
                 <label for="question_count">Number of Questions:</label>
                 <input type="number" id="question_count" name="exam[question_count]" required min="1">
 
-                <button type="button" id="nextButton">Continue</button>
+                <button type="button" id="nextButton">
+                    <i class="fas fa-arrow-right"></i>
+                    Continue
+                </button>
             </div>
 
-            <!-- قسم الأسئلة والخيارات سيتم إضافته هنا ديناميكيًا -->
             <div id="questionsSection"></div>
             
-            <!-- زر الحفظ -->
-            <button type="submit" id="submitButton" style="display: none;">Create Exam</button>
+            <button type="submit" id="submitButton" style="display: none;">
+                <i class="fas fa-save"></i>
+                Create Exam
+            </button>
         </form>
     </div>
 
     <script>
-        // التعامل مع زر "Continue"
+        // Toggle profile card
+        const profileBtn = document.getElementById('profile-btn');
+        const profileCard = document.getElementById('profile-card');
+
+        profileBtn.addEventListener('click', () => {
+            profileCard.classList.toggle('show');
+        });
+
+        // Close card when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!profileBtn.contains(e.target) && !profileCard.contains(e.target)) {
+                profileCard.classList.remove('show');
+            }
+        });
+
         document.getElementById('nextButton').addEventListener('click', function() {
             const questionCount = document.getElementById('question_count').value;
             const questionsSection = document.getElementById('questionsSection');
 
-            // إخفاء زر الاستمرار وعرض زر الحفظ
             document.getElementById('nextButton').style.display = 'none';
-            document.getElementById('submitButton').style.display = 'block';
+            document.getElementById('submitButton').style.display = 'flex';
 
-            // إعادة تعيين قسم الأسئلة
             questionsSection.innerHTML = '';
 
-            // إنشاء الحقول بناءً على عدد الأسئلة المدخل
             for (let i = 0; i < questionCount; i++) {
                 const questionDiv = document.createElement('div');
                 questionDiv.classList.add('question-section');
@@ -67,14 +410,16 @@
 
                     <div class="options" id="options_${i}">
                         <h4>Options</h4>
-                        <button type="button" onclick="addOption(${i})">Add Option</button>
+                        <button type="button" onclick="addOption(${i})">
+                            <i class="fas fa-plus"></i>
+                            Add Option
+                        </button>
                     </div>
                 `;
                 questionsSection.appendChild(questionDiv);
             }
         });
 
-        // التعامل مع إضافة خيار جديد
         function addOption(questionIndex) {
             const optionsDiv = document.getElementById(`options_${questionIndex}`);
             const optionCount = optionsDiv.querySelectorAll('.option').length;
@@ -82,20 +427,37 @@
             const optionDiv = document.createElement('div');
             optionDiv.classList.add('option');
             optionDiv.innerHTML = ` 
-                <label for="questions[${questionIndex}][options][${optionCount}][optext]">Option ${optionCount + 1}:</label>
-                <input type="text" name="questions[${questionIndex}][options][${optionCount}][optext]" required>
-                <label for="questions[${questionIndex}][options][${optionCount}][iscorrect]">Correct?</label>
-                <input type="checkbox" class="iscorrect-checkbox" data-question="${questionIndex}" data-option="${optionCount}">
-                <input type="hidden" name="questions[${questionIndex}][options][${optionCount}][iscorrect]" value="false">
+                <label>Option ${optionCount + 1}:</label>
+                <input type="text" 
+                       name="questions[${questionIndex}][options][${optionCount}][optext]" 
+                       required>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" 
+                           class="iscorrect-checkbox" 
+                           data-question="${questionIndex}" 
+                           data-option="${optionCount}">
+                    Correct Answer
+                </label>
+                
+                <input type="hidden" 
+                       name="questions[${questionIndex}][options][${optionCount}][iscorrect]" 
+                       value="false">
+                <button type="button" class="delete-option-btn" onclick="deleteOption(this)">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
             `;
             optionsDiv.appendChild(optionDiv);
 
-            // إضافة حدث تغيير للـ checkbox
             const checkbox = optionDiv.querySelector('.iscorrect-checkbox');
             const hiddenInput = optionDiv.querySelector('input[type="hidden"]');
             checkbox.addEventListener('change', function() {
                 hiddenInput.value = this.checked ? 'true' : 'false';
             });
+        }
+
+        function deleteOption(button) {
+            button.parentElement.remove();
         }
     </script>
 </body>
