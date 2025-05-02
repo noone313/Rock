@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Exam</title>
+    <title>إنشاء اختبار</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-           :root {
-            --primary: #3B82F6;           /* Blue */
-            --primary-hover: #2563EB;       /* Darker Blue */
-            --secondary: #2563EB;           /* Secondary blue (same as primary-hover) */
-            --surface: #FFFFFF;             /* White */
-            --background: #F8FAFC;          /* Light background */
-            --light: #FFFFFF;               /* White */
+        :root {
+            --primary: #3B82F6;
+            --primary-hover: #2563EB;
+            --secondary: #2563EB;
+            --surface: #FFFFFF;
+            --background: #F8FAFC;
+            --light: #FFFFFF;
             --text-primary: #1E293B;
             --text-secondary: #64748B;
             --border: #E2E8F0;
@@ -24,7 +24,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Tajawal', sans-serif;
         }
 
         body {
@@ -32,7 +32,6 @@
             color: var(--text-primary);
         }
 
-        /* Navigation Styles */
         nav {
             display: flex;
             justify-content: space-between;
@@ -92,7 +91,7 @@
 
         .card {
             position: absolute;
-            right: 0;
+            left: 0;
             top: 120%;
             background: var(--surface);
             border-radius: var(--radius-md);
@@ -145,7 +144,7 @@
         .container {
             max-width: 1000px;
             margin: 2rem auto;
-            background: var(--surface); /* White surface */
+            background: var(--surface);
             border-radius: 24px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             padding: 3rem;
@@ -191,12 +190,6 @@
             transition: all 0.3s ease;
         }
 
-        input:focus, select:focus {
-            border-color: var(--accent);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 179, 255, 0.2);
-        }
-
         button {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white !important;
@@ -212,12 +205,6 @@
             gap: 0.6rem;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Style for delete option button (always blue) */
         .delete-option-btn {
             background: var(--primary);
             color: var(--surface);
@@ -227,10 +214,7 @@
             cursor: pointer;
             transition: transform 0.3s;
             font-size: 0.9rem;
-            margin-left: 1rem;
-        }
-        .delete-option-btn:hover {
-            transform: scale(1.05);
+            margin-right: 1rem;
         }
 
         #questionsSection {
@@ -244,12 +228,6 @@
             margin-bottom: 2rem;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             border: 1px solid #f1f5f9;
-        }
-
-        .question-section h3 {
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            font-size: 1.4rem;
         }
 
         .options {
@@ -270,41 +248,40 @@
             border: 1px solid #f1f5f9;
         }
 
-        .option label {
-            margin: 0;
+        .matching-pair {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            margin: 0.5rem 0;
+        }
+
+        .matching-inputs {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .matching-inputs > div {
             flex: 1;
         }
 
-        .option input[type="text"] {
-            flex: 3;
-            margin: 0;
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            .nav_links {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
         }
-
-        .iscorrect-checkbox {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--secondary);
-        }
-
-        #submitButton {
-            width: 100%;
-            justify-content: center;
-            font-size: 1.1rem;
-            padding: 1rem;
-        }
-        /* Responsive Design */
-@media (max-width: 768px) {
-    nav {
-        padding: 1rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .nav_links {
-        order: 3;
-        width: 100%;
-        justify-content: center;
-    }}
     </style>
 </head>
 <body>
@@ -316,8 +293,10 @@
         </div>
         
         <ul class="nav_links">
-            <li><a href="/active-exams">Active Exams</a></li>
-            <li><a href="/results">Results</a></li>
+            <li><a href="/active-exams">الاختبارات النشطة</a></li>
+            <li><a href="/results">النتائج</a></li>
+            <li><a href="/users/<%= userid %>">الملف الشخصي</a></li>
+
         </ul>
 
         <div class="nav_btns">
@@ -332,28 +311,28 @@
                 </div>
                 <hr>
                 <a href="/logout" class="logout-btn" id="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
                 </a>
             </div>
         </div>
     </nav>
     <div class="container">
         <form id="examForm" action="/exams" method="POST">
-            <h1><i class="fas fa-edit"></i> Create New Exam</h1>
+            <h1><i class="fas fa-edit"></i> إنشاء اختبار جديد</h1>
 
             <div class="form-section">
-                <label for="examname">Exam Name:</label>
+                <label for="examname">اسم الاختبار:</label>
                 <input type="text" id="examname" name="exam[examname]" required>
 
-                <label for="examtime">Exam Time (minutes):</label>
+                <label for="examtime">مدة الاختبار (دقائق):</label>
                 <input type="number" id="examtime" name="exam[examtime]" required>
 
-                <label for="question_count">Number of Questions:</label>
+                <label for="question_count">عدد الأسئلة:</label>
                 <input type="number" id="question_count" name="exam[question_count]" required min="1">
 
                 <button type="button" id="nextButton">
-                    <i class="fas fa-arrow-right"></i>
-                    Continue
+                    <i class="fas fa-arrow-left"></i>
+                    المتابعة
                 </button>
             </div>
 
@@ -361,13 +340,13 @@
             
             <button type="submit" id="submitButton" style="display: none;">
                 <i class="fas fa-save"></i>
-                Create Exam
+                إنشاء الاختبار
             </button>
         </form>
     </div>
 
     <script>
-        // Toggle profile card
+        // تبديل بطاقة الملف الشخصي
         const profileBtn = document.getElementById('profile-btn');
         const profileCard = document.getElementById('profile-card');
 
@@ -375,7 +354,7 @@
             profileCard.classList.toggle('show');
         });
 
-        // Close card when clicking outside
+        // إغلاق البطاقة عند النقر خارجها
         document.addEventListener('click', (e) => {
             if (!profileBtn.contains(e.target) && !profileCard.contains(e.target)) {
                 profileCard.classList.remove('show');
@@ -395,65 +374,105 @@
                 const questionDiv = document.createElement('div');
                 questionDiv.classList.add('question-section');
                 questionDiv.innerHTML = ` 
-                    <h3>Question ${i + 1}</h3>
-                    <label for="questions[${i}][qtext]">Question Text:</label>
+                    <h3>السؤال ${i + 1}</h3>
+                    <label for="questions[${i}][qtext]">نص السؤال:</label>
                     <input type="text" id="questions[${i}][qtext]" name="questions[${i}][qtext]" required>
 
-                    <label for="questions[${i}][qtype]">Question Type:</label>
+                    <label for="questions[${i}][qtype]">نوع السؤال:</label>
                     <select id="questions[${i}][qtype]" name="questions[${i}][qtype]" required>
-                        <option value="multiple choice">Multiple Choice</option>
-                        <option value="true/false">True/False</option>
-                        <option value="fill in the blank">Fill in the Blank</option>
-                        <option value="regular choice">Regular Choice</option>
-                        <option value="short answer">Short Answer</option>
+                        <option value="multiple choice">اختيار متعدد</option>
+                        <option value="true/false">صحيح/خطأ</option>
+                        <option value="fill in the blank">ملء الفراغ</option>
+                        <option value="regular choice">اختيار فردي</option>
+                        <option value="short answer">إجابة قصيرة</option>
+                        <option value="matching">توصيل الأعمدة</option>
                     </select>
 
                     <div class="options" id="options_${i}">
-                        <h4>Options</h4>
+                        <h4>الخيارات</h4>
                         <button type="button" onclick="addOption(${i})">
                             <i class="fas fa-plus"></i>
-                            Add Option
+                            إضافة خيار
                         </button>
                     </div>
                 `;
                 questionsSection.appendChild(questionDiv);
+                
+                // إضافة حدث تغيير لنوع السؤال
+                const typeSelect = questionDiv.querySelector('select');
+                typeSelect.addEventListener('change', function() {
+                    handleQuestionTypeChange(i);
+                });
             }
         });
 
-        function addOption(questionIndex) {
+        function handleQuestionTypeChange(questionIndex) {
             const optionsDiv = document.getElementById(`options_${questionIndex}`);
-            const optionCount = optionsDiv.querySelectorAll('.option').length;
+            const questionType = document.getElementById(`questions[${questionIndex}][qtype]`).value;
+            
+            optionsDiv.innerHTML = `<h4>${questionType === 'matching' ? 'أزواج التوصيل' : 'الخيارات'}</h4>`;
+            
+            const addButton = document.createElement('button');
+            addButton.type = 'button';
+            addButton.onclick = () => addOption(questionIndex);
+            addButton.innerHTML = `<i class="fas fa-plus"></i> ${questionType === 'matching' ? 'إضافة زوج' : 'إضافة خيار'}`;
+            optionsDiv.appendChild(addButton);
+        }
 
-            const optionDiv = document.createElement('div');
-            optionDiv.classList.add('option');
-            optionDiv.innerHTML = ` 
-                <label>Option ${optionCount + 1}:</label>
-                <input type="text" 
-                       name="questions[${questionIndex}][options][${optionCount}][optext]" 
-                       required>
-
-                <label class="checkbox-label">
-                    <input type="checkbox" 
-                           class="iscorrect-checkbox" 
-                           data-question="${questionIndex}" 
-                           data-option="${optionCount}">
-                    Correct Answer
-                </label>
+        function addOption(questionIndex) {
+            const questionType = document.getElementById(`questions[${questionIndex}][qtype]`).value;
+            const optionsDiv = document.getElementById(`options_${questionIndex}`);
+            
+            if (questionType === 'matching') {
+                const pairCount = optionsDiv.querySelectorAll('.matching-pair').length;
                 
-                <input type="hidden" 
-                       name="questions[${questionIndex}][options][${optionCount}][iscorrect]" 
-                       value="false">
-                <button type="button" class="delete-option-btn" onclick="deleteOption(this)">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            `;
-            optionsDiv.appendChild(optionDiv);
+                const pairDiv = document.createElement('div');
+                pairDiv.classList.add('matching-pair');
+                pairDiv.innerHTML = `
+                    <div class="matching-inputs">
+                        <div>
+                            <label>العنصر الأيسر:</label>
+                            <input type="text" 
+                                   name="questions[${questionIndex}][pairs][${pairCount}][left]" 
+                                   required>
+                        </div>
+                        <div>
+                            <label>العنصر الأيمن:</label>
+                            <input type="text" 
+                                   name="questions[${questionIndex}][pairs][${pairCount}][right]" 
+                                   required>
+                        </div>
+                    </div>
+                    <button type="button" class="delete-option-btn" onclick="deleteOption(this)">
+                        <i class="fas fa-trash"></i> حذف
+                    </button>
+                `;
+                optionsDiv.insertBefore(pairDiv, optionsDiv.lastElementChild);
+            } else {
+                const optionCount = optionsDiv.querySelectorAll('.option:not(.matching-pair)').length;
+                
+                const optionDiv = document.createElement('div');
+                optionDiv.classList.add('option');
+                optionDiv.innerHTML = ` 
+                    <label>الخيار ${optionCount + 1}:</label>
+                    <input type="text" 
+                           name="questions[${questionIndex}][options][${optionCount}][optext]" 
+                           required>
 
-            const checkbox = optionDiv.querySelector('.iscorrect-checkbox');
-            const hiddenInput = optionDiv.querySelector('input[type="hidden"]');
-            checkbox.addEventListener('change', function() {
-                hiddenInput.value = this.checked ? 'true' : 'false';
-            });
+                    <label class="checkbox-label">
+                        <input type="${questionType === 'regular choice' ? 'radio' : 'checkbox'}" 
+                               class="iscorrect-checkbox" 
+                               name="questions[${questionIndex}][correct]" 
+                               value="${optionCount}">
+                        الإجابة الصحيحة
+                    </label>
+                    
+                    <button type="button" class="delete-option-btn" onclick="deleteOption(this)">
+                        <i class="fas fa-trash"></i> حذف
+                    </button>
+                `;
+                optionsDiv.insertBefore(optionDiv, optionsDiv.lastElementChild);
+            }
         }
 
         function deleteOption(button) {

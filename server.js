@@ -7,10 +7,13 @@ const {User, Department, Subject, Question, Option, Exam,Answer,Result} = requir
 const { verifyToken, checkUserRole } = require('./middleware/authmiddleware');
 const methodOverride = require('method-override');
 const session = require('express-session');
-
-
-
 const app = express();
+
+
+
+
+
+
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(cookieParser());
@@ -30,6 +33,9 @@ app.use(session({
 
 
 
+
+
+
 app.get('/', async(req,res)=>{
   res.render('home-page');
 });
@@ -40,7 +46,7 @@ app.get('/about-us', async(req,res)=>{
 });
 
 
-app.get('/add-departments', async(req,res)=>{
+app.get('/add-departments',verifyToken, async(req,res)=>{
   res.render('add-departments');
 });
 
@@ -84,7 +90,7 @@ const user = await User.findOne({
 
 
    res.render('TeacherPage',{user_name: user.user_name, // تمرير user_name
-    email: user.email }); // تمرير email
+    email: user.email,userid }); // تمرير email
 
 });
 
@@ -139,6 +145,7 @@ app.get('/active-exams', verifyToken, async (req, res) => {
     
     const user_name = req.user.user_name;
     const email = req.user.email;
+    const userid = req.user.userid;
 
     // استعلام للحصول على الامتحانات ذات الحالة "active"
     const exams = await Exam.findAll({ where: { examstate: 'active' } });
@@ -156,7 +163,7 @@ app.get('/active-exams', verifyToken, async (req, res) => {
     console.log(examData); // يمكنك إزالة هذا السطر بعد اختبار الكود
 
     // تمرير البيانات إلى القالب (template)
-    res.render('studentPage', { exams: examData , user_name, email});
+    res.render('studentPage', { exams: examData , user_name, email,userid});
   } catch (error) {
     console.error(error);
     res.render('error-page', {
@@ -586,7 +593,7 @@ app.get('/users', verifyToken, checkUserRole('admin'), async (req, res) => {
 
 
 // find one user endpoint
-app.get('/users/:id', verifyToken, checkUserRole('admin'), async (req, res) => {
+app.get('/users/:id', verifyToken, async (req, res) => {
   try {
     const userid = req.params.id;
 
@@ -705,7 +712,7 @@ app.put('/users/:id',verifyToken, async (req, res) => {
 
     // إرجاع النتيجة
     const updatedUser = await User.findOne({ where: { userid: userid } });
-    res.json(updatedUser);
+    res.json({updatedUser});
 
   } catch (error) {
     console.error(error);
@@ -903,7 +910,7 @@ app.post('/login', async (req, res) => {
         usertype: user.usertype,
         subid: user.subid
       },
-      'baqerali313', // هذا هو السر (secret)
+      'baqerali313', 
       { expiresIn: '24h' } // التوكن سينتهي بعد 24 ساعة
     );
 

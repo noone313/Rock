@@ -3,76 +3,84 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <title>لوحة التحكم الإدارية</title>
   <style>
     :root {
-      --primary: hsl(217, 91%, 60%);
-      --primary-hover: hsl(221, 83%, 53%);
-      --surface-1: hsl(0, 0%, 100%);
-      --surface-2: hsl(210, 40%, 98%);
-      --text-primary: hsl(224, 30%, 27%);
-      --text-secondary: hsl(215, 16%, 47%);
-      --border: hsl(214, 32%, 91%);
-      --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
-      --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.1);
-      --radius-lg: 1.25rem;
-      --radius-md: 0.875rem;
+      --primary:hsl(217, 91%, 60%);;
+      --primary-light: #a29bfe;
+      --primary-dark: hsl(221, 83%, 53%);
+      --secondary: #fd79a8;
+      --accent: #00cec9;
+      --dark: #2d3436;
+      --light: #f5f6fa;
+      --surface: #ffffff;
+      --text-primary: #2d3436;
+      --text-secondary: #636e72;
+      --radius-sm: 10px;
+      --radius-md: 15px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+      --shadow-md: 0 5px 15px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Tajawal', sans-serif;
     }
 
-    @font-face {
-      font-family: 'Inter';
-      src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
 
     body {
-      background: var(--surface-2);
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
       color: var(--text-primary);
-      line-height: 1.6;
-      padding: 2rem;
       min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
     }
 
-    .dashboard {
-      display: grid;
-      grid-template-columns: minmax(250px, 300px) 1fr;
-      gap: 2.5rem;
-      max-width: 1600px;
-      margin: 0 auto;
+    .dashboard-wrapper {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      gap: 2rem;
     }
 
-    /* الشريط الجانبي - النسخة النهائية */
+    /* الشريط الجانبي المحدث */
     .sidebar {
-      background: var(--surface-1);
+      background: linear-gradient(135deg, #2d3436 0%, #1a1a2e 100%);
       border-radius: var(--radius-lg);
-      padding: 1.75rem 1.25rem;
-      box-shadow: var(--shadow-sm);
+      padding: 2rem 1.5rem;
+      width: 300px;
+      box-shadow: var(--shadow-lg);
       position: sticky;
       top: 2rem;
-      height: fit-content;
-      border: 1px solid var(--border);
+      color: white;
     }
 
     .sidebar-header {
       padding-bottom: 1.5rem;
       margin-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
     .sidebar-header h2 {
-      font-size: 1.375rem;
-      font-weight: 600;
-      color: var(--text-primary);
+      font-size: 1.5rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 0.875rem;
-      padding: 0 0.5rem;
+      gap: 0.75rem;
+    }
+
+    .sidebar-header i {
+      color: var(--primary);
+      
     }
 
     .nav-list {
@@ -91,122 +99,146 @@
       align-items: center;
       gap: 1rem;
       padding: 0.875rem 1.25rem;
-      border-radius: var(--radius-md);
-      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      color: rgba(255,255,255,0.9);
       text-decoration: none;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      background: transparent;
-      border: 1px solid transparent;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .nav-link i {
+      width: 24px;
+      text-align: center;
+      font-size: 1.1rem;
     }
 
     .nav-link:hover {
-      background: hsl(217, 91%, 96%);
-      border-color: var(--border);
-      transform: translateX(8px);
+      background: rgba(255,255,255,0.1);
+      color: white;
+      transform: translateX(-5px);
     }
 
     .nav-link.active {
       background: var(--primary);
-      color: white !important;
+      color: white;
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
     }
 
-    .nav-link.active:hover {
-      background: var(--primary-hover);
+    /* المحتوى الرئيسي المركزي */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
     }
 
-    /* المحتوى الرئيسي - النسخة النهائية */
-    .content {
-      background: var(--surface-1);
+    .welcome-card {
+        background: var(--surface);
       border-radius: var(--radius-lg);
-      padding: 2.5rem;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border);
-    }
-
-    .content-header {
-      margin-bottom: 2.5rem;
-    }
-
-    .content-header h1 {
-      font-size: 2.125rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 0.75rem;
-      line-height: 1.2;
-    }
-
-    .content-header p {
-      color: var(--text-secondary);
-      font-size: 1.0625rem;
-      max-width: 600px;
-    }
-
-    /* نظام البطاقات المحسن */
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-      gap: 1.75rem;
-    }
-
-    .card {
-      background: var(--surface-1);
-      border: 1px solid var(--border);
-      border-radius: calc(var(--radius-lg) - 4px);
-      padding: 2rem 1.75rem;
+      padding: 3rem;
       text-align: center;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 100%;
+      box-shadow: var(--shadow-md);
       position: relative;
       overflow: hidden;
     }
 
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 24px -6px rgba(0,0,0,0.08);
+    .welcome-card h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--dark);
+      margin-bottom: 1rem;
+      position: relative;
+      display: inline-block;
     }
 
-    .card::before {
-      content: "";
+    .welcome-card h1::after {
+      content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
+      bottom: -10px;
+      right: 50%;
+      transform: translateX(50%);
+      width: 100px;
+      height: 5px;
       background: var(--primary);
-      opacity: 0;
-      transition: opacity 0.3s;
+      border-radius: 5px;
     }
 
-    .card:hover::before {
-      opacity: 1;
+    .welcome-card p {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    /* بطاقات لوحة التحكم */
+    .dashboard-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      width: 100%;
+    }
+
+    .dashboard-card {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      text-align: center;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 6px 20px rgb(10, 92, 214);
     }
 
     .card-icon {
-      font-size: 2.75rem;
-      margin-bottom: 1.25rem;
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
       color: var(--primary);
-      filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.15));
+      position: relative;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 80px;
+      height: 80px;
+    }
+
+    .card-icon::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(108, 92, 231, 0.1);
+      border-radius: 50%;
+      z-index: -1;
+      transition: var(--transition);
+    }
+
+    .dashboard-card:hover  {
+      transform: scale(1.1);
     }
 
     .card-title {
-      font-size: 1.375rem;
-      font-weight: 600;
+      font-size: 1.5rem;
+      font-weight: 700;
       color: var(--text-primary);
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
     }
 
     .card-description {
       color: var(--text-secondary);
-      font-size: 0.9375rem;
-      line-height: 1.5;
+      font-size: 1rem;
+      line-height: 1.6;
       margin-bottom: 1.5rem;
     }
 
-    /* أنماط خاصة بالأزرار في بطاقة المستخدمين */
     .card-actions {
       display: flex;
-      gap: 1rem; /* المسافة بين الأزرار */
-      justify-content: center; /* توسيط الأزرار */
-      margin-top: 1.5rem; /* المسافة من الأعلى */
+      gap: 1rem;
+      justify-content: center;
     }
 
     .card-action {
@@ -216,134 +248,164 @@
       padding: 0.75rem 1.5rem;
       background: var(--primary);
       color: white;
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-sm);
       text-decoration: none;
-      transition: all 0.25s;
-      font-weight: 500;
-      border: 2px solid transparent;
-      flex: 1; /* لجعل الأزرار تأخذ مساحة متساوية */
-      text-align: center; /* توسيط النص داخل الأزرار */
+      transition: var(--transition);
+      font-weight: 600;
+      border: none;
+      flex: 1;
+      justify-content: center;
+      max-width: 180px;
     }
 
     .card-action:hover {
-      background: var(--primary-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+      background: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
     }
 
-    @media (max-width: 1024px) {
-      .dashboard {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+    /* تأثيرات خاصة للبطاقات */
+    .dashboard-card:nth-child(1) .card-icon { color: #6c5ce7; }
+    .dashboard-card:nth-child(2) .card-icon { color: #fd79a8; }
+    .dashboard-card:nth-child(3) .card-icon { color: #00cec9; }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .dashboard-wrapper {
+        flex-direction: column;
       }
       
       .sidebar {
+        width: 100%;
         position: static;
       }
       
-      .content {
-        padding: 1.5rem;
+      .welcome-card h1 {
+        font-size: 2.2rem;
       }
     }
-
     @media (max-width: 768px) {
       body {
-        padding: 1rem;
+        padding: 1.5rem;
       }
       
-      .content-header h1 {
-        font-size: 1.75rem;
+      .welcome-card {
+        padding: 2rem;
+      }
+      
+      .welcome-card h1 {
+        font-size: 1.8rem;
+      }
+      
+      .dashboard-cards {
+        grid-template-columns: 1fr;
+      }
+      
+      .card-actions {
+        flex-direction: column;
+      }
+      
+      .card-action {
+        max-width: 100%;
       }
     }
   </style>
 </head>
 <body>
-  <div class="dashboard">
+  <div class="dashboard-wrapper">
     <!-- الشريط الجانبي -->
     <div class="sidebar">
       <div class="sidebar-header">
-        <h2>🎛️ لوحة التحكم</h2>
+        <h2><i class="fas fa-sliders-h"></i> لوحة التحكم</h2>
       </div>
       <nav>
         <ul class="nav-list">
           <li class="nav-item">
             <a href="/users" class="nav-link active">
-              <span>👥</span> إدارة المستخدمين
+              <i class="fas fa-users-cog"></i> إدارة المستخدمين
             </a>
           </li>
           <li class="nav-item">
             <a href="/not-active-users" class="nav-link">
-              <span>👥</span> إدارة المستخدمين الغير نشطين
+              <i class="fas fa-users-slash"></i> إدارة المستخدمين الغير نشطين
             </a>
           </li>
           <li class="nav-item">
             <a href="/exams" class="nav-link">
-              <span>📝</span> إدارة الامتحانات
+              <i class="fas fa-clipboard-list"></i> إدارة الامتحانات
             </a>
           </li>
           <li class="nav-item">
             <a href="/not-active-exams" class="nav-link">
-              <span>📝</span> إدارة الامتحانات الغير نشطة
+              <i class="fas fa-clipboard"></i> إدارة الامتحانات الغير نشطة
             </a>
           </li>
           <li class="nav-item">
             <a href="/questions" class="nav-link">
-              <span>❓</span> إدارة الأسئلة
+              <i class="fas fa-question-circle"></i> إدارة الأسئلة
             </a>
           </li>
           <li class="nav-item">
             <a href="/departments" class="nav-link">
-              <span>🏛️</span> إدارة الأقسام
+              <i class="fas fa-sitemap"></i> إدارة الأقسام
             </a>
           </li>
           <li class="nav-item">
             <a href="/subjects" class="nav-link">
-              <span>📚</span> إدارة المواد
+              <i class="fas fa-book-open"></i> إدارة المواد
             </a>
           </li>
         </ul>
       </nav>
     </div>
 
-    <!-- المحتوى الرئيسي -->
-    <div class="content">
-      <div class="content-header">
-        <h1>مرحبًا بك في مركز التحكم</h1>
-        <p>إدارة كافة جوانب النظام التعليمي بكل كفاءة وأمان من خلال الأدوات المتاحة</p>
+    <!-- المحتوى الرئيسي المركزي -->
+    <div class="main-content">
+      <!-- بطاقة الترحيب -->
+      <div class="welcome-card">
+        <h1>مرحبًا بك في نظام الإدارة</h1>
+        <p>يمكنك من خلال هذه اللوحة التحكم في كافة جوانب النظام التعليمي وإدارة المحتوى والمستخدمين بكل سهولة</p>
       </div>
 
-      <div class="card-grid">
+      <!-- بطاقات لوحة التحكم -->
+      <div class="dashboard-cards">
         <!-- بطاقة إدارة الأقسام -->
-        <div class="card">
-          <div class="card-icon">🏛️</div>
+        <div class="dashboard-card">
+          <div class="card-icon">
+            <i class="fas fa-university"></i>
+          </div>
           <h3 class="card-title">الأقسام الجامعية</h3>
-          <p class="card-description">إضافة التخصصات الجديدة</p>
+          <p class="card-description">إدارة الأقسام الأكاديمية والبرامج الدراسية وإنشاء تخصصات جديدة</p>
           <a href="/add-departments" class="card-action">
-            اضافة →
+            <i class="fas fa-plus"></i> اضافة
           </a>
         </div>
 
         <!-- بطاقة إدارة المواد -->
-        <div class="card">
-          <div class="card-icon">📚</div>
+        <div class="dashboard-card">
+          <div class="card-icon">
+            <i class="fas fa-book-open"></i>
+          </div>
           <h3 class="card-title">المواد الدراسية</h3>
-          <p class="card-description">اضافة مواد دراسية جديدة</p>
+          <p class="card-description">إضافة وتعديل المناهج والمقررات الدراسية بكافة تفاصيلها</p>
           <a href="/add-subjects" class="card-action">
-            اضافة →
+            <i class="fas fa-plus"></i> اضافة 
           </a>
         </div>
 
         <!-- بطاقة إدارة المستخدمين -->
-        <div class="card">
-          <div class="card-icon">👥</div>
+        <div class="dashboard-card">
+          <div class="card-icon">
+            <i class="fas fa-users"></i>
+          </div>
           <h3 class="card-title">المستخدمون</h3>
-          <p class="card-description">اضافة مستخدمين جدد</p>
+          <p class="card-description">تسجيل وإدارة حسابات المعلمين والطلاب والتحكم في الصلاحيات</p>
           <div class="card-actions">
             <a href="/register-teacher" class="card-action">
-              اضافة معلم →
+              <i class="fas fa-user-tie"></i> اضافة معلم
             </a>
             <a href="/register-student" class="card-action">
-              اضافة طالب →
+              <i class="fas fa-user-graduate"></i> اضافة طالب
             </a>
           </div>
         </div>

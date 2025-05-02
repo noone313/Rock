@@ -47,7 +47,7 @@
                         <select name="deptname" id="deptname" required>
                             <option value="">Select your Department</option>
                             <% departments.forEach(department => { %>
-                                <option value="<%= department.deptid %>"><%= department.deptname %></option>
+                                <option value="<%= department.deptname %>"><%= department.deptname %></option>
                             <% }); %>
                         </select>
                         <label for="deptname"><i class="fa-solid fa-building-user"></i></label>

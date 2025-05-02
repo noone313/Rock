@@ -163,7 +163,7 @@
             <ul class="nav-links">
                 <li><a href="/dashboard">لوحة التحكم</a></li>
                 <li><a href="/departments">الأقسام</a></li>
-                <li><a href="/add-department">إضافة قسم</a></li>
+                <li><a href="/add-departments">إضافة قسم</a></li>
             </ul>
         </nav>
     </header>
@@ -218,9 +218,8 @@
 
     <script>
         (() => {
-            'use strict'
             
-            const forms = document.querySelectorAll('.needs-validation')
+            const forms = document.querySelectorAll('.needs-validation');
             
             Array.from(forms).forEach(form => {
                 form.addEventListener('submit', event => {
@@ -228,7 +227,7 @@
                         event.preventDefault()
                         event.stopPropagation()
                     }
-                    form.classList.add('was-validated')
+                    form.classList.add('was-validated');
                 }, false)
             })
         })()
